@@ -1,6 +1,6 @@
 # Alur Pipeline Langkah demi Langkah
 
-Dokumen ini menjelaskan bagaimana sistem mengubah sepasang foto gerbong menjadi estimasi massa batu bara. Seluruh gambar berasal dari **satu sampel yang sama**: tumpukan berbentuk gundukan dengan massa aktual 1000 g (kode sampel `B10_T1000_R02_gundukan`, *baseline* kamera 10 cm), sehingga setiap tahap dapat diikuti dari awal sampai akhir.
+Bagian ini menjelaskan bagaimana sistem mengubah sepasang foto gerbong menjadi estimasi massa batu bara. Seluruh gambar berasal dari **satu sampel yang sama**: tumpukan berbentuk gundukan dengan massa aktual 1000 g (kode sampel `B10_T1000_R02_gundukan`, *baseline* kamera 10 cm), sehingga setiap tahap dapat diikuti dari awal sampai akhir.
 
 ```
 Foto stereo -> [1] Kalibrasi & rektifikasi -> [2] Peta kedalaman -> [3] Segmentasi U-Net
