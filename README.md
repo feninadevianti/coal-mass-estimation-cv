@@ -13,7 +13,18 @@ Sistem tanpa kontak sebagai alternatif timbangan rel statis atau sensor mahal un
 | Komponen | Hasil |
 |---|---|
 | Segmentasi U-Net (test set) | IoU 0,9718 |
-| Estimasi massa, model terbaik (*piecewise linear* dengan profil) | MAPE sekitar 4,1%, R² sekitar 0,9978 |
+| Estimasi massa, model terbaik (*piecewise linear* dengan profil) | MAE sekitar 22,7 g, MAPE sekitar 4,1%, R² sekitar 0,9978 |
+
+Perbandingan model konversi volume ke massa (baseline 10 cm):
+
+| Model | MAE (g) | MAPE |
+|---|---|---|
+| Densitas manual | 145,5 | 15,1% |
+| Densitas empiris | 76,1 | 10,1% |
+| *Linear regression* | 67,6 | 19,4% |
+| *Piecewise linear* | 46,2 | 7,1% |
+| *Multiple regression* + profil | 26,5 | 6,6% |
+| ***Piecewise linear* + profil** | **22,7** | **4,1%** |
 
 Detail metrik dan perbandingan seluruh model ada di folder `hasil_18_perbandingan_5_model_estimasi_massa/00_ringkasan_hasil/`.
 
@@ -35,6 +46,8 @@ Detail metrik dan perbandingan seluruh model ada di folder `hasil_18_perbandinga
 
 ![Dashboard estimasi](hasil_19_estimasi_massa_semua_model/dashboard_visual_20260704_172156/B10_T1000_R02_gundukan_20260702_133355_dashboard_estimasi.png)
 
+Pada contoh ini (sampel dengan massa aktual 1000 g, tumpukan berbentuk gundukan), sistem mengestimasi volume 1131,14 cm³ dan massa 1013,97 g dengan model *piecewise linear* + profil.
+
 ---
 
 ## Gambaran Sistem
@@ -49,13 +62,24 @@ Detail metrik dan perbandingan seluruh model ada di folder `hasil_18_perbandinga
 
 Alur lengkap:
 
+```mermaid
+flowchart LR
+    A[Kalibrasi kamera ChArUco] --> B[Rektifikasi citra stereo]
+    B --> C[Peta kedalaman stereo]
+    D[Dataset dan anotasi] --> E[Training U-Net]
+    E --> F[Mask batu bara]
+    B --> F
+    C --> G[Peta tinggi tumpukan]
+    F --> G
+    G --> H[Volume lewat homografi]
+    H --> I[Estimasi massa]
 ```
-Capture ChArUco -> Kalibrasi -> Rektifikasi -> Depth map
-        |
-Akuisisi dataset -> Anotasi -> Preprocessing -> Training U-Net -> Inferensi
-        |
-Integrasi U-Net + depth -> Volume (homografi) -> Estimasi massa
-```
+
+---
+
+## Penjelasan Bergambar
+
+Penjelasan bergambar untuk setiap tahap, dari foto stereo sampai estimasi massa pada satu sampel yang sama, tersedia di **[PIPELINE.md](PIPELINE.md)**.
 
 ---
 
@@ -122,7 +146,8 @@ Unduh di sini: **[tautan Google Drive, akan ditambahkan]**
 ## Kebutuhan
 
 - Python 3
-- Library utama: OpenCV (dengan modul `aruco`), NumPy, PyTorch, Matplotlib, dan Pandas
+- Library utama: OpenCV versi *contrib* (modul `aruco`), NumPy, PyTorch, Matplotlib, dan python-docx (untuk laporan Word)
+- Daftar lengkap ada di `requirements.txt`: `pip install -r requirements.txt`
 - Training U-Net dijalankan di Google Colab (notebook pada skrip 12)
 
 Versi library dapat disesuaikan dengan lingkungan masing-masing.
