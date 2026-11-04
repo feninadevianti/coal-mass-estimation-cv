@@ -1,0 +1,143 @@
+{
+  "created_at": "2026-07-04 12:42:42",
+  "source_csv": "c:\\Users\\Lenovo\\Downloads\\New folder (5)\\STEREO VISION - Copy\\hasil_18_kalibrasi_empiris_massa\\18_data_kalibrasi_empiris_massa_per_baseline.csv",
+  "method_label": "Multiple Regression + Profile",
+  "method_key": "multiple_profile",
+  "method_detail": {
+    "rumus": "massa = multiple regression + variabel profile muatan",
+    "penjelasan": "Model menambahkan kategori bentuk muatan seperti rata, gundukan, atau asimetris.",
+    "relevansi": "Relevan karena bentuk muatan dapat mengubah distribusi tinggi dan akurasi volume."
+  },
+  "overall_metrics": {
+    "mae_gram": 26.54617838342585,
+    "rmse_gram": 34.8724660112691,
+    "mape_percent": 6.598702271791583,
+    "r2": 0.9969432387495242,
+    "jumlah_data": 66,
+    "high_error_count": 9
+  },
+  "models_by_baseline_cm": {
+    "10": {
+      "method_label": "Multiple Regression + Profile",
+      "method_key": "multiple_profile",
+      "jumlah_data": 66,
+      "model": {
+        "formula": "massa = intercept + sum(coef_i * fitur_terstandar_i)",
+        "features": [
+          "intercept",
+          "volume_cm3",
+          "mean_height_cm",
+          "median_height_cm",
+          "max_height_cm",
+          "valid_pixels",
+          "area_batubara_cm2",
+          "p95_height_cm",
+          "p98_height_cm",
+          "profile_gendukan",
+          "profile_gundukan",
+          "profile_kanan_dominanasimetris",
+          "profile_kiri_dominan",
+          "profile_rata"
+        ],
+        "numeric_features": [
+          "volume_cm3",
+          "mean_height_cm",
+          "median_height_cm",
+          "max_height_cm",
+          "valid_pixels",
+          "area_batubara_cm2",
+          "p95_height_cm",
+          "p98_height_cm"
+        ],
+        "coefficients": {
+          "intercept": 1053.9472393425617,
+          "volume_cm3": 379.03437876010355,
+          "mean_height_cm": 90.69825426311633,
+          "median_height_cm": 65.26945510278412,
+          "max_height_cm": -112.55918500556716,
+          "valid_pixels": 91.06751086120643,
+          "area_batubara_cm2": 91.06751086120704,
+          "p95_height_cm": -102.40207151968636,
+          "p98_height_cm": 139.1760586988929,
+          "profile_gendukan": 29.261879273538717,
+          "profile_gundukan": 3.7577377302655464,
+          "profile_kanan_dominanasimetris": 43.81997928598385,
+          "profile_kiri_dominan": 28.466537491802686,
+          "profile_rata": -14.035067748867675
+        },
+        "numeric_standardization": {
+          "volume_cm3": {
+            "fill": 1065.6618979999998,
+            "mean": 1093.9279786219695,
+            "std": 701.4577882116829
+          },
+          "mean_height_cm": {
+            "fill": 3.6868314745,
+            "mean": 3.677930876151515,
+            "std": 1.62952543356467
+          },
+          "median_height_cm": {
+            "fill": 3.4953564405,
+            "mean": 3.6770216515454544,
+            "std": 1.7435592897450203
+          },
+          "max_height_cm": {
+            "fill": 7.214082241,
+            "mean": 6.5978346376969705,
+            "std": 2.4104692148818843
+          },
+          "valid_pixels": {
+            "fill": 30356.5,
+            "mean": 26462.242424242424,
+            "std": 9034.614745958854
+          },
+          "area_batubara_cm2": {
+            "fill": 303.56500000000005,
+            "mean": 264.6224242424242,
+            "std": 90.34614745958852
+          },
+          "p95_height_cm": {
+            "fill": 6.569066286,
+            "mean": 6.106774201878788,
+            "std": 2.3592243226246445
+          },
+          "p98_height_cm": {
+            "fill": 6.860557556,
+            "mean": 6.306370142787879,
+            "std": 2.370402349917441
+          }
+        },
+        "include_profile": true,
+        "profile_reference": "asimetris",
+        "profile_levels": [
+          "gendukan",
+          "gundukan",
+          "kanan_dominanasimetris",
+          "kiri_dominan",
+          "rata"
+        ],
+        "rank": 13,
+        "singular_values": [
+          21.719956627351007,
+          9.025253224452069,
+          7.462784322722762,
+          4.051018932607942,
+          2.460297454434418,
+          2.2270185895831864,
+          1.0265944869427623,
+          0.9924676933468296,
+          0.8416461121876071,
+          0.7208958553693109,
+          0.551783220654337,
+          0.2821522254397256,
+          0.14382893212136558,
+          1.1611596983317615e-15
+        ]
+      },
+      "mae_gram": 26.54617838342585,
+      "rmse_gram": 34.8724660112691,
+      "mape_percent": 6.598702271791583,
+      "r2": 0.9969432387495242
+    }
+  }
+}

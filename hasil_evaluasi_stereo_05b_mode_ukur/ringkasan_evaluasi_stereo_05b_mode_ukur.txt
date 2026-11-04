@@ -1,0 +1,51 @@
+RINGKASAN EVALUASI STEREO VISION 05B — MODE UKUR
+=======================================================
+Waktu evaluasi: 2026-06-27 21:00:15
+Input snapshot: c:\Users\Lenovo\Downloads\STEREO VISION\hasil_kalibrasi\snapshot_depth
+Z_ref file    : c:\Users\Lenovo\Downloads\STEREO VISION\hasil_kalibrasi\zref.npz
+Z_ref global  : raw
+Z_ref tinggi  : ROI LANTAI_KOSONG lokal jika tersedia
+Statistik utama depth: median
+
+Konsep evaluasi:
+1. jarak_lantai = median depth ROI lantai dibandingkan jarak aktual kamera-lantai.
+2. tinggi_objek = Z_ref - median depth ROI permukaan atas balok.
+3. Pada versi FIX ini, Z_ref untuk tinggi_objek memakai depth ROI LANTAI_KOSONG jika tersedia.
+4. Snapshot MUATAN_BATUBARA dilewati karena 05B hanya untuk validasi stereo dasar.
+
+Metrik Semua uji:
+  Jumlah data : 7
+  MAE         : 0.273 cm
+  RMSE        : 0.323 cm
+  Bias        : 0.273 cm
+  MAPE        : 4.61%
+
+Metrik jarak_lantai:
+  Jumlah data : 2
+  MAE         : 0.163 cm
+  RMSE        : 0.163 cm
+  Bias        : 0.163 cm
+  MAPE        : 0.29%
+
+Metrik tinggi_objek:
+  Jumlah data : 5
+  MAE         : 0.317 cm
+  RMSE        : 0.368 cm
+  Bias        : 0.317 cm
+  MAPE        : 6.33%
+
+Detail status:
+- depth_snap_001.npz | LANTAI_KOSONG | jarak_lantai | aktual=55.50 cm | sistem=55.66 cm | error=0.16 cm | depthROI=55.66 cm | Zref=55.80 cm | validROI=100.0% | ROI=roi_manual | VALID
+- depth_snap_002.npz | LANTAI_KOSONG | jarak_lantai | aktual=55.50 cm | sistem=55.66 cm | error=0.16 cm | depthROI=55.66 cm | Zref=55.80 cm | validROI=100.0% | ROI=roi_manual | VALID
+- depth_snap_003.npz | OBJEK_BALOK | tinggi_objek | aktual=5.00 cm | sistem=5.02 cm | error=0.02 cm | depthROI=50.64 cm | Zref=55.66 cm | validROI=100.0% | ROI=roi_manual | VALID
+- depth_snap_004.npz | OBJEK_BALOK | tinggi_objek | aktual=5.00 cm | sistem=5.47 cm | error=0.47 cm | depthROI=50.19 cm | Zref=55.66 cm | validROI=100.0% | ROI=roi_manual | VALID
+- depth_snap_005.npz | OBJEK_BALOK | tinggi_objek | aktual=5.00 cm | sistem=5.33 cm | error=0.33 cm | depthROI=50.34 cm | Zref=55.66 cm | validROI=100.0% | ROI=roi_manual | VALID
+- depth_snap_006.npz | OBJEK_BALOK | tinggi_objek | aktual=5.00 cm | sistem=5.21 cm | error=0.21 cm | depthROI=50.45 cm | Zref=55.66 cm | validROI=100.0% | ROI=roi_manual | VALID
+- depth_snap_007.npz | OBJEK_BALOK | tinggi_objek | aktual=5.00 cm | sistem=5.55 cm | error=0.55 cm | depthROI=50.11 cm | Zref=55.66 cm | validROI=100.0% | ROI=roi_manual | VALID
+
+Interpretasi:
+- Untuk lantai, error kecil menunjukkan Z_ref/depth dasar sudah baik.
+- Untuk balok, depthROI harus lebih kecil dari Z_ref. Jika Z_ref sekitar 56 cm dan balok 5 cm, depthROI atas balok ideal sekitar 51 cm.
+- Jika tinggi_objek mendekati 0 cm, ROI kemungkinan masih memilih lantai atau area gerbong besar, bukan atas balok.
+- Jika validROI objek rendah, tambah tekstur balok, perbaiki cahaya, dan pilih ROI lebih kecil di permukaan atas balok.
+- Evaluasi ini dilakukan sebelum U-Net, volume, dan berat agar dasar stereo vision terbukti terlebih dahulu.

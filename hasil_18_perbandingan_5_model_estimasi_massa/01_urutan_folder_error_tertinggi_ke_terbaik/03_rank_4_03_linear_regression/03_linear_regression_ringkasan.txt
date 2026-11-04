@@ -1,0 +1,21 @@
+RINGKASAN METODE - LINEAR REGRESSION
+========================================================================
+Waktu       : 2026-07-04 12:42:35
+Sumber data : c:\Users\Lenovo\Downloads\New folder (5)\STEREO VISION - Copy\hasil_18_kalibrasi_empiris_massa\18_data_kalibrasi_empiris_massa_per_baseline.csv
+
+Jumlah data       : 66
+MAE               : 67.606662 gram
+RMSE              : 78.258529 gram
+MAPE              : 19.445398%
+R2                : 0.984606
+Jumlah error tinggi: 14
+
+Metrik per baseline
+-------------------
+Baseline 10 cm
+  Data : 66
+  MAE  : 67.606662 gram
+  RMSE : 78.258529 gram
+  MAPE : 19.445397515335685
+  R2   : 0.984606
+

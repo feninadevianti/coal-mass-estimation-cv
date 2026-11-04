@@ -1,0 +1,63 @@
+{
+  "created_at": "2026-07-04 12:42:38",
+  "source_csv": "c:\\Users\\Lenovo\\Downloads\\New folder (5)\\STEREO VISION - Copy\\hasil_18_kalibrasi_empiris_massa\\18_data_kalibrasi_empiris_massa_per_baseline.csv",
+  "method_label": "Piecewise Linear",
+  "method_key": "piecewise",
+  "method_detail": {
+    "rumus": "massa = a_segmen*volume_cm3 + b_segmen",
+    "penjelasan": "Model membagi volume menjadi segmen rendah, sedang, dan tinggi, lalu membuat garis berbeda.",
+    "relevansi": "Relevan jika hubungan volume dan massa berbeda pada muatan kecil, sedang, dan besar."
+  },
+  "overall_metrics": {
+    "mae_gram": 46.19679494229287,
+    "rmse_gram": 60.039046503651015,
+    "mape_percent": 7.070445291090829,
+    "r2": 0.9909392578187627,
+    "jumlah_data": 66,
+    "high_error_count": 9
+  },
+  "models_by_baseline_cm": {
+    "10": {
+      "method_label": "Piecewise Linear",
+      "method_key": "piecewise",
+      "jumlah_data": 66,
+      "model": {
+        "formula": "massa = a_segment*volume_cm3 + b_segment",
+        "breaks_volume_cm3": [
+          646.6371317999999,
+          1419.0625320000001
+        ],
+        "segments": {
+          "1": {
+            "count": 22,
+            "a": 1.145854400790787,
+            "b": -33.23445044235944,
+            "volume_min": 59.94180174,
+            "volume_max": 614.1740596,
+            "formula": "massa = a*volume_cm3 + b"
+          },
+          "2": {
+            "count": 22,
+            "a": 0.8298610478846546,
+            "b": 184.80911872991925,
+            "volume_min": 662.8686679,
+            "volume_max": 1418.573898,
+            "formula": "massa = a*volume_cm3 + b"
+          },
+          "3": {
+            "count": 22,
+            "a": 0.7220300808370083,
+            "b": 390.7727051790558,
+            "volume_min": 1420.0398,
+            "volume_max": 2360.649873,
+            "formula": "massa = a*volume_cm3 + b"
+          }
+        }
+      },
+      "mae_gram": 46.19679494229287,
+      "rmse_gram": 60.039046503651015,
+      "mape_percent": 7.070445291090829,
+      "r2": 0.9909392578187627
+    }
+  }
+}

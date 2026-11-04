@@ -1,0 +1,21 @@
+RINGKASAN METODE - PIECEWISE LINEAR + PROFILE
+========================================================================
+Waktu       : 2026-07-04 12:42:46
+Sumber data : c:\Users\Lenovo\Downloads\New folder (5)\STEREO VISION - Copy\hasil_18_kalibrasi_empiris_massa\18_data_kalibrasi_empiris_massa_per_baseline.csv
+
+Jumlah data       : 66
+MAE               : 22.683586 gram
+RMSE              : 29.387049 gram
+MAPE              : 4.124964%
+R2                : 0.997829
+Jumlah error tinggi: 6
+
+Metrik per baseline
+-------------------
+Baseline 10 cm
+  Data : 66
+  MAE  : 22.683586 gram
+  RMSE : 29.387049 gram
+  MAPE : 4.124964311716328
+  R2   : 0.997829
+

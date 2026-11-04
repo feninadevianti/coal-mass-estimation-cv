@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<camera_matrix type_id="opencv-matrix">
+  <rows>3</rows>
+  <cols>3</cols>
+  <dt>d</dt>
+  <data>
+    594.14191369029186 0. 327.01705581693756 0. 660.58706694239663
+    246.12798411750231 0. 0. 1.</data></camera_matrix>
+<dist_coeffs type_id="opencv-matrix">
+  <rows>1</rows>
+  <cols>5</cols>
+  <dt>d</dt>
+  <data>
+    -0.37134330889307049 0.15048308995035492 0.00071607445844366522
+    -0.0020012713227388996 -0.033394297414747053</data></dist_coeffs>
+<new_camera_matrix type_id="opencv-matrix">
+  <rows>3</rows>
+  <cols>3</cols>
+  <dt>d</dt>
+  <data>
+    483.34317138378526 0. 327.09218407573161 0. 538.92583802037041
+    247.80251426299873 0. 0. 1.</data></new_camera_matrix>
+<roi type_id="opencv-matrix">
+  <rows>4</rows>
+  <cols>1</cols>
+  <dt>i</dt>
+  <data>
+    25 35 590 412</data></roi>
+<rms>0.35430566950332304</rms>
+<mean_error>0.35430558990027711</mean_error>
+<image_width>640</image_width>
+<image_height>480</image_height>
+<n_valid_frames>86</n_valid_frames>
+<per_frame_error type_id="opencv-matrix">
+  <rows>86</rows>
+  <cols>1</cols>
+  <dt>f</dt>
+  <data>
+    0.360842526 0.378898025 0.349814653 0.370187402 0.304496169
+    0.320886791 0.218480691 0.316374958 0.351440579 0.332785606
+    0.334347069 0.342063874 0.298064828 0.281292647 0.467090577
+    0.371864051 0.347840309 0.293939888 0.220943406 0.28814584
+    0.358092457 0.302474678 0.302989215 0.297587782 0.306229025
+    0.298757464 0.319650173 0.246339515 0.41114369 0.346198231
+    0.343748271 0.235014975 0.441973537 0.417476743 0.513824284
+    0.573582649 0.603627801 0.639106989 0.556175292 0.584848285
+    0.550839067 0.56199944 0.498389482 0.569880486 0.548274517
+    0.188660488 0.284236073 0.287988067 0.313992232 0.232892483
+    0.195734844 0.250626475 0.37049979 0.225177333 0.202067807
+    0.224886864 0.308045566 0.281847239 0.159309745 0.161351666
+    0.279998511 0.284717709 0.415665329 0.324112862 0.24010098
+    0.324023545 0.339643896 0.389942497 0.362575382 0.254474372
+    0.291317195 0.444769591 0.275135517 0.234835595 0.221737251
+    0.21656689 0.274028331 0.336999148 0.440456927 0.316078156
+    0.339260191 0.301075816 0.271622062 0.394883424 0.233722016
+    0.323931783</data></per_frame_error>
+<pola_terpilih>DEFAULT</pola_terpilih>
+<status>BAGUS</status>
+<squares_x>5</squares_x>
+<squares_y>7</squares_y>
+<square_length>0.039</square_length>
+<marker_length>0.029000000000000001</marker_length>
+<aruco_dict_name>DICT_4X4_50</aruco_dict_name>
+<capture_script_reference>"06_CAPTURE_CHARUCO_STEREO_LEFT_BOOST_MULTI_DETECT"</capture_script_reference>
+<crop_aktif>1</crop_aktif>
+<simpan_frame_crop>1</simpan_frame_crop>
+<input_sudah_crop_dari_script_06>1</input_sudah_crop_dari_script_06>
+<terapkan_crop_ulang>0</terapkan_crop_ulang>
+<roi_capture type_id="opencv-matrix">
+  <rows>1</rows>
+  <cols>4</cols>
+  <dt>f</dt>
+  <data>
+    0. 0.0500000007 1. 0.949999988</data></roi_capture>
+<gunakan_clahe>1</gunakan_clahe>
+<gunakan_sharpen_ringan>1</gunakan_sharpen_ringan>
+<gunakan_multi_detect>1</gunakan_multi_detect>
+<left_extra_boost>1</left_extra_boost>
+<camera_height_cm>60.</camera_height_cm>
+<camera_tilt_min_deg>10.</camera_tilt_min_deg>
+<camera_tilt_max_deg>15.</camera_tilt_max_deg>
+<camera_fov_deg>120.</camera_fov_deg>
+<gerbong_panjang_cm>40.</gerbong_panjang_cm>
+<gerbong_lebar_cm>10.</gerbong_lebar_cm>
+<gerbong_tinggi_cm>7.5</gerbong_tinggi_cm>
+<valid_files>
+  frame_001.png frame_002.png frame_003.png frame_004.png frame_005.png
+  frame_008.png frame_009.png frame_010.png frame_011.png frame_012.png
+  frame_013.png frame_014.png frame_015.png frame_016.png frame_017.png
+  frame_018.png frame_019.png frame_020.png frame_021.png frame_022.png
+  frame_023.png frame_024.png frame_025.png frame_026.png frame_027.png
+  frame_028.png frame_029.png frame_030.png frame_031.png frame_032.png
+  frame_033.png frame_034.png frame_035.png frame_036.png frame_037.png
+  frame_038.png frame_039.png frame_040.png frame_043.png frame_044.png
+  frame_045.png frame_047.png frame_048.png frame_050.png frame_051.png
+  frame_053.png frame_054.png frame_055.png frame_056.png frame_057.png
+  frame_058.png frame_059.png frame_060.png frame_061.png frame_062.png
+  frame_063.png frame_064.png frame_065.png frame_066.png frame_067.png
+  frame_068.png frame_069.png frame_070.png frame_071.png frame_072.png
+  frame_073.png frame_074.png frame_075.png frame_076.png frame_077.png
+  frame_078.png frame_079.png frame_080.png frame_081.png frame_082.png
+  frame_083.png frame_084.png frame_085.png frame_086.png frame_087.png
+  frame_088.png frame_089.png frame_090.png frame_091.png frame_092.png
+  frame_093.png</valid_files>
+</opencv_storage>

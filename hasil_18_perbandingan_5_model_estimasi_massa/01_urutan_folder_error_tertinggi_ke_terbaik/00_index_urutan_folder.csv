@@ -1,0 +1,7 @@
+urutan_error_tertinggi_ke_terbaik,ranking_akhir,folder_urut,folder_asli,method_label,ranking_score,mae_gram,rmse_gram,mape_percent,r2,high_error_count
+1,6,01_rank_6_01_density_manual,01_density_manual,Densitas Manual,29,145.5269579848955,169.87219297556484,15.146844198809372,0.9274661404966307,34
+2,5,02_rank_5_02_density_empirical,02_density_empirical,Densitas Empiris,24,76.1356135925524,91.39027606824278,10.126988857469996,0.9790059523560715,19
+3,4,03_rank_4_03_linear_regression,03_linear_regression,Linear Regression,22,67.60666212643014,78.25852917689262,19.445397515335685,0.9846057135781546,14
+4,3,04_rank_3_04_piecewise_linear,04_piecewise_linear,Piecewise Linear,14,46.19679494229287,60.039046503651015,7.070445291090829,0.9909392578187627,9
+5,2,05_rank_2_05_multiple_regression_profile,05_multiple_regression_profile,Multiple Regression + Profile,11,26.54617838342585,34.8724660112691,6.598702271791583,0.9969432387495242,9
+6,1,06_rank_1_06_piecewise_linear_profile,06_piecewise_linear_profile,Piecewise Linear + Profile,5,22.683585549071296,29.38704908507984,4.124964311716328,0.9978292582620242,6

@@ -1,0 +1,92 @@
+ANALISIS PERBANDINGAN 5 MODEL ESTIMASI MASSA BATUBARA
+========================================================================
+Waktu evaluasi : 2026-07-04 12:42:49
+Sumber data    : c:\Users\Lenovo\Downloads\New folder (5)\STEREO VISION - Copy\hasil_18_kalibrasi_empiris_massa\18_data_kalibrasi_empiris_massa_per_baseline.csv
+
+CARA PEMBERIAN SCORE
+--------------------
+Cara pemberian score:
+1. Setiap metode diberi peringkat untuk MAE, RMSE, MAPE, R2, dan jumlah error tinggi.
+2. Untuk MAE, RMSE, MAPE, dan jumlah error tinggi, nilai paling kecil mendapat rank 1 karena error lebih rendah berarti lebih baik.
+3. Untuk R2, nilai paling besar mendapat rank 1 karena semakin mendekati 1 berarti prediksi lebih sesuai dengan data aktual.
+4. ranking_score = rank_MAE + rank_RMSE + rank_MAPE + rank_R2 + rank_error_tinggi.
+5. Metode terbaik adalah metode dengan ranking_score paling kecil. Jika score sama, script memprioritaskan MAE dan RMSE yang lebih kecil.
+
+PENJELASAN 5 MODEL
+--------------------
+Densitas Manual
+  Rumus       : massa = densitas_manual*volume_cm3
+  Penjelasan  : Densitas ditentukan manual oleh peneliti, bukan dihitung dari data.
+  Relevansi   : Berguna untuk menguji asumsi densitas batubara tertentu terhadap hasil sistem.
+
+Densitas Empiris
+  Rumus       : massa = densitas_empiris*volume_cm3
+  Penjelasan  : Densitas dihitung dari data aktual, lalu dipakai untuk mengubah volume menjadi massa.
+  Relevansi   : Sesuai konsep fisika massa = densitas x volume, tetapi densitas diambil dari data kalibrasi.
+
+Linear Regression
+  Rumus       : massa = a*volume_cm3 + b
+  Penjelasan  : Model garis lurus antara volume hasil sistem dan massa aktual.
+  Relevansi   : Dipakai sebagai model dasar karena massa batubara secara fisik berkaitan dengan volume.
+
+Piecewise Linear
+  Rumus       : massa = a_segmen*volume_cm3 + b_segmen
+  Penjelasan  : Model membagi volume menjadi segmen rendah, sedang, dan tinggi, lalu membuat garis berbeda.
+  Relevansi   : Relevan jika hubungan volume dan massa berbeda pada muatan kecil, sedang, dan besar.
+
+Multiple Regression + Profile
+  Rumus       : massa = multiple regression + variabel profile muatan
+  Penjelasan  : Model menambahkan kategori bentuk muatan seperti rata, gundukan, atau asimetris.
+  Relevansi   : Relevan karena bentuk muatan dapat mengubah distribusi tinggi dan akurasi volume.
+
+Piecewise Linear + Profile
+  Rumus       : massa = a_segmen*volume_cm3 + b_segmen + offset_profile
+  Penjelasan  : Model membagi data menjadi segmen volume, lalu menambahkan koreksi berdasarkan profil muatan.
+  Relevansi   : Relevan karena muatan rata, gundukan, dan asimetris dapat memiliki pola volume-massa yang berbeda.
+
+URUTAN METODE DARI ERROR TERTINGGI KE TERBAIK
+---------------------------------------------
+Densitas Manual | ranking akhir 6 | score 29 | MAE 145.527 g | RMSE 169.872 g | MAPE 15.147% | R2 0.927466
+Densitas Empiris | ranking akhir 5 | score 24 | MAE 76.136 g | RMSE 91.390 g | MAPE 10.127% | R2 0.979006
+Linear Regression | ranking akhir 4 | score 22 | MAE 67.607 g | RMSE 78.259 g | MAPE 19.445% | R2 0.984606
+Piecewise Linear | ranking akhir 3 | score 14 | MAE 46.197 g | RMSE 60.039 g | MAPE 7.070% | R2 0.990939
+Multiple Regression + Profile | ranking akhir 2 | score 11 | MAE 26.546 g | RMSE 34.872 g | MAPE 6.599% | R2 0.996943
+Piecewise Linear + Profile | ranking akhir 1 | score 5 | MAE 22.684 g | RMSE 29.387 g | MAPE 4.125% | R2 0.997829
+
+TABEL METRIK METODE DARI ERROR TERTINGGI KE TERBAIK
+---------------------------------------------------
+6. Densitas Manual | score 29 | MAE 145.527 g | RMSE 169.872 g | MAPE 15.147% | R2 0.927466 | error tinggi 34
+5. Densitas Empiris | score 24 | MAE 76.136 g | RMSE 91.390 g | MAPE 10.127% | R2 0.979006 | error tinggi 19
+4. Linear Regression | score 22 | MAE 67.607 g | RMSE 78.259 g | MAPE 19.445% | R2 0.984606 | error tinggi 14
+3. Piecewise Linear | score 14 | MAE 46.197 g | RMSE 60.039 g | MAPE 7.070% | R2 0.990939 | error tinggi 9
+2. Multiple Regression + Profile | score 11 | MAE 26.546 g | RMSE 34.872 g | MAPE 6.599% | R2 0.996943 | error tinggi 9
+1. Piecewise Linear + Profile | score 5 | MAE 22.684 g | RMSE 29.387 g | MAPE 4.125% | R2 0.997829 | error tinggi 6
+
+ANALISIS
+--------
+Metode terbaik berdasarkan ranking gabungan adalah Piecewise Linear + Profile dengan MAE 22.684 g, RMSE 29.387 g, MAPE 4.125% dan R2 0.997829.
+
+Pembanding terdekat adalah Multiple Regression + Profile dengan MAE 26.546 g, RMSE 34.872 g, MAPE 6.599% dan R2 0.996943.
+
+Pemilihan ini tidak hanya memakai R2, karena R2 tinggi dapat tetap menyisakan error besar pada muatan tertentu. MAE menunjukkan besar kesalahan rata-rata dalam gram, RMSE memberi hukuman lebih besar pada error ekstrem, MAPE menunjukkan kesalahan relatif terhadap massa aktual, sedangkan jumlah error tinggi menunjukkan kestabilan metode pada data sulit.
+
+Data yang paling perlu dicek ulang adalah B10_T0400_R03_asimetris_20260701_214455 pada baseline 10 cm karena error metode terbaik mencapai 65.632 g. Data seperti ini perlu dicek pada sisi massa aktual, segmentasi mask, depth/height map, volume, dan posisi/bentuk muatan.
+
+Total data yang masuk daftar cek ulang adalah 14 sampel. Prioritas awal adalah sampel yang error-nya besar pada metode terbaik dan juga konsisten besar pada banyak metode, karena pola tersebut lebih mungkin berasal dari masalah data atau kondisi pengukuran, bukan hanya kelemahan satu model.
+
+DATA PRIORITAS CEK ULANG
+------------------------
+- B10_T0400_R03_asimetris_20260701_214455 | baseline 10 cm | profil asimetris | aktual 400.000 g | error terbaik 65.632 g | alasan: error persen metode terbaik >= 15.0%; error tinggi muncul di banyak metode
+- B10_T0500_R01_rata_20260702_094546 | baseline 10 cm | profil rata | aktual 500.000 g | error terbaik 63.288 g | alasan: error tinggi muncul di banyak metode
+- B10_T0200_R01_rata_20260701_211428 | baseline 10 cm | profil rata | aktual 200.000 g | error terbaik 56.882 g | alasan: error persen metode terbaik >= 15.0%; error tinggi muncul di banyak metode
+- B10_T0300_R03_asimetris_20260701_213320 | baseline 10 cm | profil asimetris | aktual 300.000 g | error terbaik 46.052 g | alasan: error persen metode terbaik >= 15.0%
+- B10_T0600_R01_rata_20260702_104918 | baseline 10 cm | profil rata | aktual 600.000 g | error terbaik 45.099 g | alasan: error tinggi muncul di banyak metode
+- B10_T0100_R01_rata_20260701_210452 | baseline 10 cm | profil rata | aktual 100.000 g | error terbaik 28.979 g | alasan: error persen metode terbaik >= 15.0%; error tinggi muncul di banyak metode
+- B10_T0100_R03_asimetris_20260701_211139 | baseline 10 cm | profil asimetris | aktual 100.000 g | error terbaik 26.680 g | alasan: error persen metode terbaik >= 15.0%; error tinggi muncul di banyak metode
+- B10_T0900_R01_rata_20260702_131733 | baseline 10 cm | profil rata | aktual 900.000 g | error terbaik 13.597 g | alasan: error tinggi muncul di banyak metode
+- B10_T0050_R01_rata_20260701_205534 | baseline 10 cm | profil rata | aktual 50.000 g | error terbaik 7.520 g | alasan: error persen metode terbaik >= 15.0%; error tinggi muncul di banyak metode
+- B10_T0800_R01_rata_20260702_125239 | baseline 10 cm | profil rata | aktual 800.000 g | error terbaik 5.301 g | alasan: error tinggi muncul di banyak metode
+- B10_T0100_R02_gundukan_20260701_210929 | baseline 10 cm | profil gundukan | aktual 100.000 g | error terbaik 1.204 g | alasan: error tinggi muncul di banyak metode
+- B10_T0400_R01_rata_20260701_213719 | baseline 10 cm | profil rata | aktual 400.000 g | error terbaik 1.187 g | alasan: error tinggi muncul di banyak metode
+- B10_T0050_R02_kiri_dominan_20260701_205841 | baseline 10 cm | profil kiri dominan | aktual 50.000 g | error terbaik 0.000 g | alasan: error tinggi muncul di banyak metode
+- B10_T0050_R03_kanan_dominanasimetris_20260701_210027 | baseline 10 cm | profil kanan dominan/asimetris | aktual 50.000 g | error terbaik 0.000 g | alasan: error tinggi muncul di banyak metode

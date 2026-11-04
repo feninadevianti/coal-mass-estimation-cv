@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-07-04 12:42:35",
+  "source_csv": "c:\\Users\\Lenovo\\Downloads\\New folder (5)\\STEREO VISION - Copy\\hasil_18_kalibrasi_empiris_massa\\18_data_kalibrasi_empiris_massa_per_baseline.csv",
+  "method_label": "Linear Regression",
+  "method_key": "linear",
+  "method_detail": {
+    "rumus": "massa = a*volume_cm3 + b",
+    "penjelasan": "Model garis lurus antara volume hasil sistem dan massa aktual.",
+    "relevansi": "Dipakai sebagai model dasar karena massa batubara secara fisik berkaitan dengan volume."
+  },
+  "overall_metrics": {
+    "mae_gram": 67.60666212643014,
+    "rmse_gram": 78.25852917689262,
+    "mape_percent": 19.445397515335685,
+    "r2": 0.9846057135781546,
+    "jumlah_data": 66,
+    "high_error_count": 14
+  },
+  "models_by_baseline_cm": {
+    "10": {
+      "method_label": "Linear Regression",
+      "method_key": "linear",
+      "jumlah_data": 66,
+      "model": {
+        "formula": "massa = a*volume_cm3 + b",
+        "a": 0.8922396817754145,
+        "b": 76.22677574183827
+      },
+      "mae_gram": 67.60666212643014,
+      "rmse_gram": 78.25852917689262,
+      "mape_percent": 19.445397515335685,
+      "r2": 0.9846057135781546
+    }
+  }
+}

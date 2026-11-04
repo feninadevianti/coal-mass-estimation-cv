@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-07-04 12:42:31",
+  "source_csv": "c:\\Users\\Lenovo\\Downloads\\New folder (5)\\STEREO VISION - Copy\\hasil_18_kalibrasi_empiris_massa\\18_data_kalibrasi_empiris_massa_per_baseline.csv",
+  "method_label": "Densitas Empiris",
+  "method_key": "density_empirical",
+  "method_detail": {
+    "rumus": "massa = densitas_empiris*volume_cm3",
+    "penjelasan": "Densitas dihitung dari data aktual, lalu dipakai untuk mengubah volume menjadi massa.",
+    "relevansi": "Sesuai konsep fisika massa = densitas x volume, tetapi densitas diambil dari data kalibrasi."
+  },
+  "overall_metrics": {
+    "mae_gram": 76.1356135925524,
+    "rmse_gram": 91.39027606824278,
+    "mape_percent": 10.126988857469996,
+    "r2": 0.9790059523560715,
+    "jumlah_data": 66,
+    "high_error_count": 19
+  },
+  "models_by_baseline_cm": {
+    "10": {
+      "method_label": "Densitas Empiris",
+      "method_key": "density_empirical",
+      "jumlah_data": 66,
+      "model": {
+        "formula": "massa = density_g_per_cm3 * volume_cm3",
+        "density_g_per_cm3": 0.9594135350292411,
+        "density_mode": "median"
+      },
+      "mae_gram": 76.1356135925524,
+      "rmse_gram": 91.39027606824278,
+      "mape_percent": 10.126988857469996,
+      "r2": 0.9790059523560715
+    }
+  }
+}

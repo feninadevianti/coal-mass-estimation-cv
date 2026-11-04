@@ -1,0 +1,14 @@
+09 - ROBOFLOW ANOTASI MANUAL
+
+Tahap ini bukan script Python.
+
+Fungsi:
+Melakukan anotasi manual area batubara pada citra kiri rectified dari folder:
+dataset_unet/kiri_rectified/
+
+Output yang dibutuhkan untuk tahap berikutnya:
+Export dataset Roboflow dalam format semantic segmentation, lalu diproses oleh:
+10_07_preprocess_roboflow_binary_unet_SELARAS_06_PIPELINE.py
+
+Catatan:
+Tahap ini tetap dimasukkan ke urutan folder karena ada di alur PDF, tetapi tidak berisi kode.

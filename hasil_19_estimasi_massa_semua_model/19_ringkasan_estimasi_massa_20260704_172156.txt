@@ -1,0 +1,20 @@
+RINGKASAN SCRIPT 19 - ESTIMASI MASSA SEMUA MODEL
+================================================================
+Waktu proses       : 2026-07-04 17:22:53
+Input Script 12    : c:\Users\Lenovo\Downloads\SIDANG SKRIPSI KODINGAN\BASELINE 10 CM\hasil_volume_homografi\batch_volume_summary_20260704_123711.csv
+Folder model S18   : c:\Users\Lenovo\Downloads\SIDANG SKRIPSI KODINGAN\BASELINE 10 CM\hasil_18_perbandingan_5_model_estimasi_massa
+Jumlah data        : 66
+Model tersedia     : density_manual, density_empirical, linear, piecewise, multiple_profile, piecewise_profile
+Mode rekomendasi   : all
+Output CSV         : c:\Users\Lenovo\Downloads\SIDANG SKRIPSI KODINGAN\BASELINE 10 CM\hasil_19_estimasi_massa_semua_model\19_estimasi_massa_semua_model_20260704_172156.csv
+
+Dashboard visual   : c:\Users\Lenovo\Downloads\SIDANG SKRIPSI KODINGAN\BASELINE 10 CM\hasil_19_estimasi_massa_semua_model\dashboard_visual_20260704_172156
+Jumlah dashboard   : 66
+Grafik model       : c:\Users\Lenovo\Downloads\SIDANG SKRIPSI KODINGAN\BASELINE 10 CM\hasil_19_estimasi_massa_semua_model\grafik_model_20260704_172156\19_grafik_perbandingan_prediksi_semua_model.png
+
+Catatan:
+- Script ini tidak melatih ulang model.
+- Script ini hanya membaca model Script 18 dan menerapkan ke data baru Script 12.
+- Jika baseline input tidak ada di model, baseline model terdekat dipakai dan dicatat di kolom baseline_model_*_cm.
+- Kolom massa_rekomendasi_g mengikuti MODEL_DIPAKAI. Jika MODEL_DIPAKAI = all, prioritas default adalah Piecewise Linear + Profile.
+- Dashboard visual dibuat jika matplotlib tersedia dan file volume_npz dari Script 12 ditemukan.

@@ -1,0 +1,44 @@
+EVALUASI VOLUME HOMOGRAFI GERBONG BATUBARA
+================================================
+
+Posisi evaluasi: setelah Script 12 dan sebelum evaluasi massa akhir.
+Input volume history : c:\Users\Lenovo\Downloads\New folder (5)\STEREO VISION - Copy\hasil_volume_homografi\volume_history.csv
+Data aktual opsional : c:\Users\Lenovo\Downloads\New folder (5)\STEREO VISION - Copy\hasil_evaluasi_volume_homografi\data_volume_aktual_homografi.csv
+Jumlah data          : 66
+
+Dasar fisik gerbong:
+- Panjang gerbong     : 40.000 cm
+- Lebar gerbong       : 10.000 cm
+- Tinggi gerbong      : 7.500 cm
+- Kapasitas fisik     : 3000.000 cm3
+- Batas volume maks   : 3300.000 cm3
+- Batas max height    : 15.000 cm
+- Min valid pixels    : 50
+- Area/pixel harapan  : 0.000001000000 m2
+
+Hasil evaluasi internal:
+- Data lulus          : 66/66
+- Data perlu dicek    : 0
+
+Statistik volume sistem:
+- Minimum             : 59.941802 cm3
+- Rata-rata           : 1093.927979 cm3
+- Median              : 1065.661898 cm3
+- Maksimum            : 2360.649873 cm3
+- CV                  : 64.614219%
+
+Statistik max height:
+- Minimum             : 1.733688 cm
+- Rata-rata           : 6.597835 cm
+- Maksimum            : 10.160247 cm
+
+Statistik valid volume pixels:
+- Minimum             : 6604
+- Rata-rata           : 26462.24
+- Maksimum            : 36052
+
+Evaluasi terhadap volume aktual/manual belum dilakukan karena data aktual belum diisi.
+Isi file data_volume_aktual_homografi.csv jika ingin membandingkan volume sistem dengan volume aktual.
+
+Interpretasi:
+Evaluasi internal memastikan hasil volume masih masuk akal terhadap dimensi fisik gerbong, jumlah piksel valid tersedia, tinggi maksimum tidak berlebihan, dan area per piksel sesuai dengan hasil homografi. Jika data aktual tersedia, evaluasi absolut dilakukan dengan membandingkan volume sistem terhadap volume aktual/manual.

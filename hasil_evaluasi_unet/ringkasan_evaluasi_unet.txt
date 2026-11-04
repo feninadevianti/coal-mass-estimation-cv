@@ -1,0 +1,17 @@
+RINGKASAN EVALUASI SEGMENTASI SEMANTIK U-NET
+============================================
+Waktu evaluasi : 2026-06-27 17:59:25
+Dataset        : c:\Users\Lenovo\Downloads\STEREO VISION\dataset_unet_binary_roboflow_FIXED_01
+Split          : test
+Jumlah data    : 30
+Threshold      : 0.5
+
+METRIK RATA-RATA
+iou             : mean=0.971758 | median=0.977511 | min=0.913043 | max=1.000000
+dice            : mean=0.985590 | median=0.988628 | min=0.954545 | max=1.000000
+pixel_accuracy  : mean=0.998713 | median=0.998683 | min=0.997376 | max=1.000000
+precision       : mean=0.981825 | median=0.983329 | min=0.963326 | max=1.000000
+recall          : mean=0.989606 | median=0.996576 | min=0.926471 | max=1.000000
+specificity     : mean=0.998897 | median=0.998895 | min=0.997454 | max=1.000000
+
+Catatan: evaluasi ini menilai kualitas segmentasi U-Net, bukan depth atau berat akhir.

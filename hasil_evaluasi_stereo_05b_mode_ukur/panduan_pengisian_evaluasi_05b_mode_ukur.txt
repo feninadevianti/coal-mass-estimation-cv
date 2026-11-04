@@ -1,0 +1,29 @@
+PANDUAN EVALUASI STEREO 05B — MODE UKUR
+=======================================
+
+File CSV:
+c:\Users\Lenovo\Downloads\STEREO VISION\hasil_evaluasi_stereo_05b_mode_ukur\data_evaluasi_stereo_05b_mode_ukur.csv
+
+Makna jenis_uji:
+1. jarak_lantai
+   - berasal dari snapshot LANTAI_KOSONG.
+   - nilai_aktual_cm = jarak manual kamera ke lantai gerbong.
+   - ROI default = center_crop_50.
+
+2. tinggi_objek
+   - berasal dari snapshot OBJEK_BALOK.
+   - nilai_aktual_cm = tinggi balok acuan, misalnya 5 cm.
+   - ROI harus dipilih manual pada permukaan atas balok.
+   - Jalankan: python 05B_evaluasi_stereo_depth_lantai_objek_MODE_UKUR_ZREF_LOKAL_LANTAI_FIX.py --pilih-roi
+
+3. lewati
+   - biasanya snapshot MUATAN_BATUBARA.
+   - tidak dievaluasi di Script 05B.
+
+Rumus:
+- jarak_lantai = median depth ROI lantai.
+- tinggi_objek = Z_ref - median depth ROI permukaan atas balok.
+
+Jika hasil tinggi balok mendekati 0 cm:
+- ROI kemungkinan masih berada di lantai/area gerbong besar, bukan di atas balok.
+- Ulangi --pilih-roi dan pilih kotak kecil hanya pada permukaan atas balok.

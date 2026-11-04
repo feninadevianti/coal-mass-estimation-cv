@@ -1,0 +1,95 @@
+{
+  "created_at": "2026-07-04 12:42:46",
+  "source_csv": "c:\\Users\\Lenovo\\Downloads\\New folder (5)\\STEREO VISION - Copy\\hasil_18_kalibrasi_empiris_massa\\18_data_kalibrasi_empiris_massa_per_baseline.csv",
+  "method_label": "Piecewise Linear + Profile",
+  "method_key": "piecewise_profile",
+  "method_detail": {
+    "rumus": "massa = a_segmen*volume_cm3 + b_segmen + offset_profile",
+    "penjelasan": "Model membagi data menjadi segmen volume, lalu menambahkan koreksi berdasarkan profil muatan.",
+    "relevansi": "Relevan karena muatan rata, gundukan, dan asimetris dapat memiliki pola volume-massa yang berbeda."
+  },
+  "overall_metrics": {
+    "mae_gram": 22.683585549071296,
+    "rmse_gram": 29.38704908507984,
+    "mape_percent": 4.124964311716328,
+    "r2": 0.9978292582620242,
+    "jumlah_data": 66,
+    "high_error_count": 6
+  },
+  "models_by_baseline_cm": {
+    "10": {
+      "method_label": "Piecewise Linear + Profile",
+      "method_key": "piecewise_profile",
+      "jumlah_data": 66,
+      "model": {
+        "formula": "massa = intercept_segmen + a_segmen*volume_cm3 + offset_profile",
+        "breaks_volume_cm3": [
+          646.6371317999999,
+          1419.0625320000001
+        ],
+        "profile_reference": "asimetris",
+        "profile_levels": [
+          "gendukan",
+          "gundukan",
+          "kanan_dominanasimetris",
+          "kiri_dominan",
+          "rata"
+        ],
+        "segments": {
+          "1": {
+            "count": 22,
+            "intercept": -83.4926927825228,
+            "a_volume": 1.2145659489436256,
+            "profile_offsets": {
+              "gendukan": -62.4622067320783,
+              "gundukan": 20.692259110182498,
+              "kanan_dominanasimetris": 60.68942147079208,
+              "kiri_dominan": 38.07672043433314,
+              "rata": 61.664973888232694
+            },
+            "profile_reference": "asimetris",
+            "volume_min": 59.94180174,
+            "volume_max": 614.1740596,
+            "formula": "massa = intercept_segmen + a_segmen*volume_cm3 + offset_profile"
+          },
+          "2": {
+            "count": 22,
+            "intercept": 128.0814282295014,
+            "a_volume": 0.9052960753716333,
+            "profile_offsets": {
+              "gendukan": -4.263256414560601e-14,
+              "gundukan": -138.13168429344014,
+              "kanan_dominanasimetris": 0.0,
+              "kiri_dominan": 0.0,
+              "rata": 69.2438798623761
+            },
+            "profile_reference": "asimetris",
+            "volume_min": 662.8686679,
+            "volume_max": 1418.573898,
+            "formula": "massa = intercept_segmen + a_segmen*volume_cm3 + offset_profile"
+          },
+          "3": {
+            "count": 22,
+            "intercept": 354.09733606572485,
+            "a_volume": 0.7415435786880987,
+            "profile_offsets": {
+              "gendukan": 0.0,
+              "gundukan": -22.27848908868946,
+              "kanan_dominanasimetris": 0.0,
+              "kiri_dominan": 0.0,
+              "rata": 33.76166875412823
+            },
+            "profile_reference": "asimetris",
+            "volume_min": 1420.0398,
+            "volume_max": 2360.649873,
+            "formula": "massa = intercept_segmen + a_segmen*volume_cm3 + offset_profile"
+          }
+        }
+      },
+      "mae_gram": 22.683585549071296,
+      "rmse_gram": 29.38704908507984,
+      "mape_percent": 4.124964311716328,
+      "r2": 0.9978292582620242
+    }
+  }
+}

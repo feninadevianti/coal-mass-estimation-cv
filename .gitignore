@@ -216,3 +216,19 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+*.pth
+roboflow_export_unzipped/
+__pycache__/
+.ipynb_checkpoints/
+*.zip
+dataset_unet/
+dataset_unet_binary_roboflow/
+dataset_unet_binary_roboflow_FIXED_01/
+charuco_left/
+charuco_right/
+hasil_volume_homografi/
+hasil_integrasi_unet_depth/
+hasil_inference_unet/
+hasil_kalibrasi/**/*.png
+hasil_kalibrasi/**/*.jpg
+hasil_kalibrasi/**/*.jpeg

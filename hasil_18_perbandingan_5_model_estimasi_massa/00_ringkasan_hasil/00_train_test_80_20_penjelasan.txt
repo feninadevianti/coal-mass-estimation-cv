@@ -1,0 +1,15 @@
+EVALUASI TRAIN-TEST 80:20
+=========================
+Train ratio : 0.80
+Random seed : 42
+
+Maksud evaluasi ini adalah menguji model pada data yang tidak dipakai saat proses fitting.
+Data diurutkan dari massa kecil sampai besar, lalu sebagian data dipisahkan sebagai data uji.
+Jika error data uji tetap kecil, model lebih layak dipakai untuk prediksi sampel baru.
+
+1. Multiple Regression + Profile | MAE test 26.737 g | RMSE test 40.028 g | MAPE test 5.502% | R2 test 0.995851
+2. Piecewise Linear + Profile | MAE test 29.107 g | RMSE test 39.193 g | MAPE test 4.099% | R2 test 0.996022
+3. Piecewise Linear | MAE test 44.223 g | RMSE test 65.704 g | MAPE test 6.068% | R2 test 0.988821
+4. Linear Regression | MAE test 61.110 g | RMSE test 76.423 g | MAPE test 12.460% | R2 test 0.984875
+5. Densitas Empiris | MAE test 78.844 g | RMSE test 92.840 g | MAPE test 9.855% | R2 test 0.977679
+6. Densitas Manual | MAE test 145.496 g | RMSE test 166.030 g | MAPE test 15.502% | R2 test 0.928614

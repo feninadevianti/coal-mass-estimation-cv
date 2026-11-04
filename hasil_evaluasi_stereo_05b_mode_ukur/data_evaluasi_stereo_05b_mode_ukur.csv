@@ -1,0 +1,8 @@
+no,snapshot_npz,snapshot_type,snapshot_label,jenis_uji,nilai_aktual_cm,area_pengukuran,roi_x1,roi_y1,roi_x2,roi_y2,catatan
+1,c:\Users\Lenovo\Downloads\STEREO VISION\hasil_kalibrasi\snapshot_depth\depth_snap_001.npz,LANTAI_KOSONG,LANTAI KOSONG,jarak_lantai,55.5,roi_manual,165,257,461,296,isi jarak aktual kamera-ke-lantai; ROI default center_crop_50
+2,c:\Users\Lenovo\Downloads\STEREO VISION\hasil_kalibrasi\snapshot_depth\depth_snap_002.npz,LANTAI_KOSONG,LANTAI KOSONG,jarak_lantai,55.5,roi_manual,162,257,465,296,isi jarak aktual kamera-ke-lantai; ROI default center_crop_50
+3,c:\Users\Lenovo\Downloads\STEREO VISION\hasil_kalibrasi\snapshot_depth\depth_snap_003.npz,OBJEK_BALOK,OBJEK BALOK,tinggi_objek,5,roi_manual,299,248,336,279,isi tinggi balok; WAJIB/SEBAIKNYA pilih ROI manual permukaan atas balok
+4,c:\Users\Lenovo\Downloads\STEREO VISION\hasil_kalibrasi\snapshot_depth\depth_snap_004.npz,OBJEK_BALOK,OBJEK BALOK,tinggi_objek,5,roi_manual,404,251,441,283,isi tinggi balok; WAJIB/SEBAIKNYA pilih ROI manual permukaan atas balok
+5,c:\Users\Lenovo\Downloads\STEREO VISION\hasil_kalibrasi\snapshot_depth\depth_snap_005.npz,OBJEK_BALOK,OBJEK BALOK,tinggi_objek,5,roi_manual,197,254,234,288,isi tinggi balok; WAJIB/SEBAIKNYA pilih ROI manual permukaan atas balok
+6,c:\Users\Lenovo\Downloads\STEREO VISION\hasil_kalibrasi\snapshot_depth\depth_snap_006.npz,OBJEK_BALOK,OBJEK BALOK,tinggi_objek,5,roi_manual,259,255,286,279,isi tinggi balok; WAJIB/SEBAIKNYA pilih ROI manual permukaan atas balok
+7,c:\Users\Lenovo\Downloads\STEREO VISION\hasil_kalibrasi\snapshot_depth\depth_snap_007.npz,OBJEK_BALOK,OBJEK BALOK,tinggi_objek,5,roi_manual,339,250,374,284,isi tinggi balok; WAJIB/SEBAIKNYA pilih ROI manual permukaan atas balok

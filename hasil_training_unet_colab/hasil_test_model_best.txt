@@ -1,0 +1,12 @@
+HASIL TEST MODEL TERBAIK
+========================
+Best epoch     : 16
+Best Valid IoU : 0.952280
+Test Loss      : 0.068552
+Test IoU       : 0.971767
+Test Dice      : 0.985595
+Test Pixel Acc : 0.998713
+Image size     : 640x480
+Batch size     : 2
+Learning rate  : 0.0001
+Max epochs     : 100
