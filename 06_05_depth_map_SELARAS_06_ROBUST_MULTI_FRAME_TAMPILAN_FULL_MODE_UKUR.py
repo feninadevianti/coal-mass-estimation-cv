@@ -1,29 +1,8 @@
-"""
-SCRIPT 5 — DISPARITY MAP → DEPTH MAP → Z_REF (MODE UKUR)
-==============================================
-Skripsi: Estimasi Massa Muatan Batubara (Enina Devianti Farid - UNAIR)
-
-Fungsi  : 
-  1. Buka kamera stereo (sudah terkalibrasi)
-  2. Remap frame menggunakan stereomap.xml
-  3. Hitung disparity map dengan StereoSGBM
-  4. Konversi ke depth map 3D menggunakan matriks Q (cv2.reprojectImageTo3D)
-  5. Filter noise dengan Median + WLS Filter
-  6. Mode Z_ref: ukur jarak lantai gerbong kosong → simpan sebagai referensi
-
-Cara pakai:
-    pip install opencv-contrib-python numpy
-    python 05_depth_map.py
-
 Kontrol keyboard:
     [D]   → Toggle tampilan: depth map / frame asli / disparity
     [Z]   → Masuk mode Z_REF (arahkan ke gerbong KOSONG, tekan lagi untuk simpan)
     [S]   → Simpan snapshot depth map saat ini
     [ESC] → Keluar
-
-Output:
-    hasil_kalibrasi/zref.npz   ← nilai Z referensi lantai gerbong kosong
-"""
 
 import cv2
 import numpy as np
@@ -31,18 +10,9 @@ import os
 import warnings
 from collections import deque
 
-# ══════════════════════════════════════════
-# KONFIGURASI — SESUAIKAN DI SINI
-# ══════════════════════════════════════════
-
 CAMERA_ID_KIRI  = 0
 CAMERA_ID_KANAN = 1
 
-# =========================================================
-# SETUP SELARAS SCRIPT 06 / SCRIPT 4
-# =========================================================
-# Karena kalibrasi kamu memakai crop dari Script 06, frame live di Script 5
-# juga wajib di-crop dengan ROI yang sama SEBELUM cv2.remap.
 TERAPKAN_CROP_REALTIME = True
 ROI_LEFT = (0.00, 0.05, 1.00, 0.95)
 ROI_RIGHT = (0.00, 0.05, 1.00, 0.95)
@@ -56,9 +26,6 @@ CAMERA_TILT_MIN_DEG = 10.0
 CAMERA_TILT_MAX_DEG = 15.0
 CAMERA_FOV_DEG = 120.0
 
-# Koreksi sederhana untuk membandingkan depth sumbu kamera dengan tinggi vertikal manual.
-# Jika kamera tilt 10-15 derajat, jarak sepanjang sumbu kamera memang lebih besar
-# daripada pengukuran vertikal. Untuk crosscheck manual, gunakan koreksi cos(tilt).
 KOREKSI_TILT_AKTIF = True
 CAMERA_TILT_ESTIMASI_DEG = 12.5
 
@@ -68,8 +35,6 @@ GERBONG_TINGGI_CM = 7.5
 
 RMS_STEREO_BATAS_AMAN = 1.0
 
-# Ukuran dashboard tampilan OpenCV. Dibuat lebih lebar agar teks tidak terpotong.
-# Jika layar laptop kecil, OpenCV tetap bisa di-resize manual.
 DISPLAY_CANVAS_WIDTH = 1100
 DISPLAY_CANVAS_HEIGHT = 720
 DISPLAY_HEADER_HEIGHT = 172
@@ -77,16 +42,10 @@ DISPLAY_MAX_WIDTH = 1280
 DISPLAY_MAX_HEIGHT = 740
 DISPLAY_MIRROR_HORIZONTAL = True
 
-# Path dibuat relatif ke LOKASI FILE SCRIPT ini, bukan ke folder tempat
-# command dijalankan -- supaya tidak perlu cd ke folder tertentu dulu
-# sebelum menjalankan script (konsisten dengan Script 11).
 BASE_DIR        = os.path.dirname(os.path.abspath(__file__))
 STEREOMAP_XML   = os.path.join(BASE_DIR, "hasil_kalibrasi", "stereomap.xml")
 OUTPUT_DIR      = os.path.join(BASE_DIR, "hasil_kalibrasi")
 
-# ── Parameter StereoSGBM ──
-# Sesuaikan setelah melihat hasil visual — tidak ada nilai "pasti"
-# Panduan awal untuk webcam 1280×720:
 SGBM_MIN_DISP    = 0        # biasanya 0
 SGBM_NUM_DISP    = 96       # harus kelipatan 16; naikkan jika objek dekat
 SGBM_BLOCK_SIZE  = 5        # ganjil, 3–11; lebih kecil = lebih detail tapi lebih noisy
@@ -124,31 +83,21 @@ STABILISASI_N_FRAME = 15       # jumlah frame untuk median temporal; 10-20 umum 
 STABILISASI_MIN_FRAME = 8      # minimal frame sebelum status boleh dianggap stabil
 
 # Batas kelayakan area tengah/ROI untuk Z_ref dan snapshot.
-# ROI yang dimaksud di sini adalah area tengah ZREF_CENTER_CROP, bukan ROI evaluasi 05B manual.
 STABIL_MIN_VALID_ROI = 85.0    # % piksel valid minimal di ROI tengah
 STABIL_MAX_ROI_STD_CM = 1.50   # INFO saja: std spasial ROI. Untuk objek/balok nilai ini memang bisa besar.
 STABIL_MAX_JITTER_CM = 0.80    # perubahan median ROI antar-frame maksimal
 
 # FIX STABILITAS:
-# Script versi sebelumnya menganggap TIDAK STABIL jika stdROI spasial > 1.50 cm.
-# Itu cocok untuk lantai kosong yang rata, tetapi SALAH/terlalu ketat saat ada balok/objek,
-# karena area ROI memang berisi beberapa ketinggian berbeda sehingga stdROI besar.
-# Jadi status stabil utama sekarang memakai validROI + jitter temporal, bukan stdROI spasial.
 STABIL_GUNAKAN_STD_SPASIAL_SEBAGAI_SYARAT = False
 
-# Simpan tetap boleh dipaksa, tetapi script akan memberi WARNING kalau belum stabil.
 WAJIB_STABIL_UNTUK_SIMPAN = False
 
-# Mode penandaan snapshot. Ini hanya metadata dan panduan tampilan;
-# pemilihan ROI objek tetap dilakukan lebih teliti di Script 05B.
 SNAPSHOT_MODES = [
     ("LANTAI_KOSONG", "LANTAI KOSONG", "Untuk Z_ref / evaluasi jarak lantai. Gerbong harus kosong."),
     ("OBJEK_BALOK", "OBJEK BALOK", "Untuk evaluasi tinggi balok. ROI balok dipilih di Script 05B."),
     ("MUATAN_BATUBARA", "MUATAN BATUBARA", "Untuk tahap lanjut integrasi U-Net, volume, dan massa."),
 ]
 
-# Penguncian kamera. Tidak semua webcam mendukung semua properti ini.
-# Jika tidak didukung, OpenCV biasanya mengabaikan tanpa error fatal.
 KUNCI_SETTING_KAMERA = True
 MATIKAN_AUTO_WB = True
 MATIKAN_AUTOFOCUS = True
@@ -156,8 +105,6 @@ WB_TEMPERATURE = 4500
 BRIGHTNESS_VALUE = 128
 CONTRAST_VALUE = 128
 
-# Exposure manual dibuat opsional karena nilai exposure tiap webcam berbeda-beda.
-# Aktifkan hanya kalau gambar terlalu berubah-ubah dan kamera mendukung properti exposure.
 PAKAI_EXPOSURE_MANUAL = False
 EXPOSURE_MANUAL_VALUE = -6
 GAIN_MANUAL_VALUE = 0
