@@ -1,45 +1,8 @@
-"""
-SCRIPT 4 - REKTIFIKASI + PEMETAAN STEREO + REAL-TIME REMAP
-==========================================================
-
-Fungsi utama:
-1. Memuat parameter hasil kalibrasi ekstrinsik/stereo dari XML.
-2. Jika stereomap.xml belum lengkap, script dapat membuat ulang:
-   - R1, R2, P1, P2, Q dengan cv2.stereoRectify()
-   - stereoMapL_x, stereoMapL_y, stereoMapR_x, stereoMapR_y dengan cv2.initUndistortRectifyMap()
-   - menyimpan semuanya ke hasil_kalibrasi/stereomap.xml memakai cv2.FileStorage
-3. Memuat stereomap.xml untuk aplikasi real-time.
-4. Menerapkan cv2.remap() pada frame kamera kiri dan kanan.
-5. Menampilkan hasil rektifikasi secara real-time.
-6. Menyimpan screenshot hasil remap jika tombol S ditekan.
-
-Script ini diselaraskan dengan:
-- Script 2: kalibrasi intrinsik ChArUco XML
-  hasil_kalibrasi/intrinsik_kiri.xml
-  hasil_kalibrasi/intrinsik_kanan.xml
-
-- Script 3: kalibrasi ekstrinsik/stereo ChArUco XML
-  hasil_kalibrasi/stereomap.xml
-  hasil_kalibrasi/stereo_params.xml
-
-Cara pakai:
-python 04_rektifikasi_stereomap_realtime_SELARAS_06_CROP.py
-
-Kontrol saat jendela tampil:
-[S]   Simpan screenshot
-[G]   Tampilkan/sembunyikan garis epipolar horizontal
-[ESC] Keluar
-"""
-
 import cv2
 import numpy as np
 import os
 from datetime import datetime
 
-
-# =========================================================
-# KONFIGURASI
-# =========================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(BASE_DIR, "hasil_kalibrasi")
 
@@ -53,37 +16,21 @@ REALTIME_OUTPUT_DIR = os.path.join(OUTPUT_DIR, "realtime_remap")
 CAMERA_ID_KIRI = 0
 CAMERA_ID_KANAN = 1
 
-# Sesuaikan dengan resolusi saat kalibrasi. Jika XML menyimpan image_width dan image_height,
-# nilai dari XML akan dipakai sebagai acuan utama.
 DEFAULT_WIDTH = 640
 DEFAULT_HEIGHT = 480
 
-# Jika kamera tidak berhasil memberi resolusi sesuai kalibrasi, frame dapat di-resize untuk uji tampilan.
-# Untuk pengukuran final, sebaiknya False dan pastikan kamera benar-benar memakai resolusi kalibrasi.
 ALLOW_RESIZE_IF_NEEDED = True
 
-# Jika True, script akan menghitung ulang R1, R2, P1, P2, Q, dan stereo map
-# agar output matriks rektifikasi selalu tampil di terminal.
 FORCE_REGENERATE_STEREOMAP = True
 
-# Output tambahan
 MATRIX_OUTPUT_DIR = os.path.join(OUTPUT_DIR, "matrix_output")
 BEFORE_AFTER_OUTPUT_DIR = os.path.join(OUTPUT_DIR, "before_after_rectification")
 
-# Stereo map berukuran sangat besar. False = terminal hanya menampilkan ringkasan dan sampel.
-# File TXT dan gambar tetap disimpan.
 PRINT_FULL_STEREO_MAP = False
 STEREO_MAP_SAMPLE_SIZE = 6
 
-# Simpan otomatis 1 gambar sebelum/sesudah rektifikasi saat frame pertama berhasil dibaca.
 AUTO_SAVE_FIRST_FRAME = True
 
-
-# =========================================================
-# KONFIGURASI SELARAS SCRIPT 06 CAPTURE / CROP PIPELINE
-# =========================================================
-# Script 06 menyimpan gambar kalibrasi dalam kondisi crop-resize.
-# Artinya frame live dari kamera juga harus di-crop dengan ROI yang sama sebelum cv2.remap.
 CROP_AKTIF = True
 SIMPAN_FRAME_CROP = True
 TERAPKAN_CROP_REALTIME = True
@@ -91,12 +38,10 @@ TERAPKAN_CROP_REALTIME = True
 ROI_LEFT = (0.00, 0.05, 1.00, 0.95)
 ROI_RIGHT = (0.00, 0.05, 1.00, 0.95)
 
-# Ukuran raw dari kamera sebelum crop. Pada setup kamu biasanya 640x480.
 CAMERA_RAW_WIDTH = 640
 CAMERA_RAW_HEIGHT = 480
 FPS = 30
 
-# Setting kamera diselaraskan dengan Script 06 Capture ChArUco.
 SAMAKAN_SETTING_KAMERA = True
 WB_TEMPERATURE = 4500
 BRIGHTNESS_VALUE = 128
@@ -117,21 +62,14 @@ GERBONG_PANJANG_CM = 40.0
 GERBONG_LEBAR_CM = 10.0
 GERBONG_TINGGI_CM = 7.5
 
-# Peringatan kualitas stereo. Jika RMS stereo lebih tinggi dari batas ini,
-# script tetap bisa berjalan untuk cek visual, tetapi jangan dipakai untuk pengukuran final.
 RMS_STEREO_BATAS_AMAN = 1.0
 
-# Pengaturan tampilan agar seluruh before/after terlihat di layar laptop.
 WINDOW_NAME_REALTIME = "Output Realtime: Sebelum vs Setelah Rektifikasi [S=Simpan | G=Garis | ESC=Keluar]"
 DISPLAY_MAX_WIDTH = 1180
 DISPLAY_MAX_HEIGHT = 680
 DISPLAY_WINDOW_NORMAL = True
 DISPLAY_MIRROR_HORIZONTAL = True
 
-
-# =========================================================
-# UTILITAS XML OPENCV
-# =========================================================
 def _node_empty(node):
     try:
         return node.empty()
@@ -199,10 +137,6 @@ def cek_node_ada(path_xml, nama_node):
     fs.release()
     return ada
 
-
-# =========================================================
-# ROI / CROP REALTIME - SELARAS SCRIPT 06
-# =========================================================
 def clamp_roi(roi):
     x1, y1, x2, y2 = roi
     x1 = max(0.0, min(0.95, float(x1)))
@@ -261,10 +195,6 @@ def persiapkan_frame_realtime(frame, nama_kamera, image_size):
 
     return frame
 
-
-# =========================================================
-# OUTPUT MATRIX: TERMINAL + TXT + GAMBAR PNG
-# =========================================================
 def nama_file_aman(teks):
     aman = "".join(c if c.isalnum() else "_" for c in teks)
     while "__" in aman:
@@ -551,11 +481,6 @@ def simpan_gambar_sebelum_sesudah(frameL, frameR, rectL, rectR, gabung_display, 
     print(f"[OK] Gambar setelah rektifikasi tersimpan : {path_sesudah}")
     print(f"[OK] Output realtime tersimpan            : {path_realtime}")
 
-
-
-# =========================================================
-# LOAD INTRINSIK DAN STEREO PARAMS
-# =========================================================
 def muat_intrinsik(path_xml, nama_kamera):
     fs = buka_xml_read(path_xml)
     camera_matrix = baca_matrix(fs, "camera_matrix")
