@@ -1,31 +1,3 @@
-"""
-SCRIPT 8 — VALIDASI DAN FIX MASK DATASET MENJADI BINARY 0/1
-SELARAS SCRIPT 7 PREPROCESS ROBOFLOW + PIPELINE U-NET
-=====================================================
-
-Fungsi:
-1. Mengecek folder dataset_unet_binary_roboflow.
-2. Membaca semua mask di train/valid/test.
-3. Memaksa semua mask menjadi binary:
-   - Jika mask sudah 0/1 -> dibiarkan
-   - Jika mask 0/255 -> diubah menjadi 0/1
-   - Jika mask multi-value lain -> nilai di COAL_VALUES_MULTI_CLASS dianggap batubara,
-     selebihnya dianggap background
-4. Output disimpan ke folder baru:
-   dataset_unet_binary_roboflow_FIXED_01
-
-Gunakan folder hasil FIXED ini untuk training U-Net.
-
-Catatan selaras pipeline:
-- Input script ini adalah output Script 7: dataset_unet_binary_roboflow.
-- Tahap ini hanya validasi/perbaikan mask 0/1; tidak melakukan crop, remap, atau homografi.
-- Homografi dipakai nanti pada tahap ROI/volume gerbong, bukan pada tahap fix mask U-Net.
-- Pada dataset 200 gambar (split 140/30/30) yang sudah diverifikasi, mask dari Script 7
-  semestinya SUDAH 0/1 murni. Cabang COAL_VALUES_MULTI_CLASS di bawah ini hanya berfungsi
-  sebagai pengaman/fallback jika suatu saat ada mask yang lolos dari Script 7 dalam
-  bentuk multi-value mentah (belum dikonversi binary).
-"""
-
 import os
 import shutil
 import csv
@@ -40,17 +12,11 @@ OUTPUT_ROOT = os.path.join(BASE_DIR, "dataset_unet_binary_roboflow_FIXED_01")
 
 SPLITS = ["train", "valid", "test"]
 
-# Mapping fallback jika ditemukan mask multi-value mentah (seharusnya jarang terjadi
-# karena Script 7 sudah mengeluarkan mask 0/1):
-# 1 = batubara (sesuai _classes.csv dataset 200 gambar)
-# 0 = background
 COAL_VALUES_MULTI_CLASS = [1]
 
 SAVE_MASK_VISUAL_255 = True
 SAVE_OVERLAY_PREVIEW = True
 
-# Homografi tidak dipakai di tahap ini. Jangan warp mask di sini,
-# karena training U-Net harus tetap konsisten dengan citra rectified dari Script 6/7.
 GUNAKAN_HOMOGRAFI_DI_TAHAP_INI = False
 
 
