@@ -1,57 +1,3 @@
-"""
-SCRIPT 7 — PREPROCESS DATASET ROBOFLOW UNTUK U-NET BINARY
-SELARAS SCRIPT 06 + STEREOMAP
-========================================================
-
-Fungsi:
-1. Membaca dataset export Roboflow semantic segmentation ZIP.
-2. Membaca pasangan image dan mask: *.jpg + *_mask.png.
-3. Mengubah mask multi-value menjadi biner:
-   0 = background / bukan batubara
-   1 = batubara
-4. Resize image dan mask agar selaras dengan pipeline sebelumnya.
-5. Augmentasi khusus data train.
-6. Menyimpan output gambar, mask biner 0/1, mask visual 0/255, overlay preview, dan log CSV.
-
-PENTING:
-- Berdasarkan pengecekan dataset Roboflow versi 200 gambar (split 140/30/30, 70/15/15),
-  nilai mask aktual yang muncul HANYA 0 dan 1 (diverifikasi langsung dengan numpy.unique
-  pada seluruh mask train/valid/test).
-- _classes.csv pada dataset ini juga eksplisit menyatakan:
-    0 = background
-    1 = coal
-- Mapping yang dipakai sekarang:
-    0 -> background
-    1 -> batubara
-- Versi dataset sebelumnya (236 gambar) memakai nilai 1 dan 2 sebagai batubara, dan
-  versi sebelum itu lagi sempat diasumsikan 2 dan 3. Jika suatu saat re-export Roboflow
-  berikutnya mengubah skema pixel value lagi, jalankan ulang verifikasi unique_mask_values
-  (lihat unique_mask_values_report.csv di output) sebelum training, agar tidak diam-diam
-  menghasilkan mask kosong.
-
-Catatan selaras pipeline:
-- Dataset Roboflow sebaiknya berasal dari folder dataset_unet/kiri_rectified.
-- Script ini TIDAK melakukan crop/remap ulang, karena gambar dari Roboflow sudah harus berupa citra rectified.
-- Ukuran target akan dicocokkan dengan hasil_kalibrasi/stereomap.xml jika file tersedia.
-
-Output:
-dataset_unet_binary_roboflow/
-    train/images/
-    train/masks/
-    train/masks_visual/
-    train/preview_overlay/
-    valid/images/
-    valid/masks/
-    valid/masks_visual/
-    valid/preview_overlay/
-    test/images/
-    test/masks/
-    test/masks_visual/
-    test/preview_overlay/
-    preprocessing_log.csv
-    unique_mask_values_report.csv
-"""
-
 import os
 import csv
 import zipfile
@@ -66,52 +12,30 @@ from datetime import datetime
 # =========================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Letakkan file ZIP Roboflow di folder yang sama dengan script ini.
 INPUT_ZIP = os.path.join(BASE_DIR, "estimasi-muatan-batubara.v1i.png-mask-semantic.zip")
-
-# Folder ekstraksi sementara
 EXTRACT_DIR = os.path.join(BASE_DIR, "roboflow_export_unzipped")
-
-# Folder output final untuk U-Net binary
 OUTPUT_DIR = os.path.join(BASE_DIR, "dataset_unet_binary_roboflow")
 
-# File stereomap dipakai hanya untuk membaca ukuran image_width/image_height,
-# bukan untuk remap ulang. Remap sudah dilakukan saat akuisisi dataset Script 6.
 KALIBRASI_DIR = os.path.join(BASE_DIR, "hasil_kalibrasi")
 STEREOMAP_XML = os.path.join(KALIBRASI_DIR, "stereomap.xml")
 GUNAKAN_UKURAN_DARI_STEREOMAP = True
 
-# Jika INPUT_ZIP default tidak ditemukan, script bisa mencari ZIP Roboflow otomatis.
 AUTO_CARI_ZIP = True
 
-# Selaras dengan hasil kalibrasi/rektifikasi sebelumnya.
-# Dataset Roboflow kamu terbaca 640x480, jadi default ini aman.
 TARGET_WIDTH = 640
 TARGET_HEIGHT = 480
 
-# Mapping berdasarkan isi mask aktual dataset 200 gambar (terverifikasi):
-# 0 = background
-# 1 = batubara
 COAL_PIXEL_VALUES = [1]
 
-# Augmentasi hanya untuk data train agar valid/test tetap murni.
 AUGMENT_TRAIN_ONLY = True
 
-# Simpan preview overlay supaya mudah dicek visual.
 SAVE_OVERLAY_PREVIEW = True
 MAX_PREVIEW_PER_SPLIT = 80
 
-# Jika True, output mask training tetap bernilai 0 dan 1.
-# Jangan diganti ke 255 untuk training binary.
 SAVE_MASK_AS_0_1 = True
 
-# Format image output
 IMAGE_EXT = ".png"
 
-
-# =========================================================
-# UTILITAS DASAR
-# =========================================================
 def buat_folder(path):
     os.makedirs(path, exist_ok=True)
 
@@ -319,13 +243,7 @@ def resize_image_mask(img, mask):
 
 def konversi_mask_biner(mask):
     """
-    Catatan selaras pipeline:
-- Dataset Roboflow sebaiknya berasal dari folder dataset_unet/kiri_rectified.
-- Script ini TIDAK melakukan crop/remap ulang, karena gambar dari Roboflow sudah harus berupa citra rectified.
-- Ukuran target akan dicocokkan dengan hasil_kalibrasi/stereomap.xml jika file tersedia.
-- Mapping coal pixel value memakai COAL_PIXEL_VALUES = [1], sesuai _classes.csv dan
-  verifikasi numpy.unique pada dataset 200 gambar (split 140/30/30).
-
+    
 Output:
         mask_binary bernilai 0 dan 1.
     """
