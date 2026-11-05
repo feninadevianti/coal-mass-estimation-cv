@@ -1,42 +1,9 @@
-"""
-SCRIPT 3 - KALIBRASI EKSTRINSIK/STEREO CHARUCO + REKTIFIKASI + STEREOMAP XML
-================================================================================
-
-Fungsi:
-1. Memuat hasil kalibrasi intrinsik dari Script 2 dalam format XML:
-   - hasil_kalibrasi/intrinsik_kiri.xml
-   - hasil_kalibrasi/intrinsik_kanan.xml
-2. Membaca pasangan gambar ChArUco dari:
-   - charuco_left
-   - charuco_right
-3. Mendeteksi titik ChArUco yang sama pada kamera kiri dan kanan.
-4. Melakukan kalibrasi ekstrinsik/stereo dengan cv2.stereoCalibrate().
-5. Menggunakan cv2.CALIB_FIX_INTRINSIC agar nilai intrinsik dikunci.
-6. Menghasilkan parameter stereo: R, T, E, F.
-7. Melakukan stereo rectification dengan cv2.stereoRectify().
-8. Membuat stereo map dengan cv2.initUndistortRectifyMap().
-9. Menyimpan hasil akhir ke:
-   - hasil_kalibrasi/stereomap.xml
-10. Menyimpan preview rektifikasi dan ringkasan gambar pendukung.
-
-Catatan penting:
-- Script ini sudah diselaraskan dengan Script 2 ChArUco XML.
-- Script ini TIDAK membaca file .npz.
-- Script ini TIDAK memakai chessboard biasa.
-- Script ini memakai ChArUco sesuai folder charuco_left dan charuco_right.
-
-Cara pakai:
-python 03_kalibrasi_stereo_CHARUCO_XML_SELARAS_06_CROP_MULTI_DETECT.py
-"""
-
 import cv2
 from cv2 import aruco
 import numpy as np
 import glob
 import os
 
-# Matplotlib hanya dipakai untuk menyimpan grafik ringkasan.
-# Jika tidak tersedia, proses kalibrasi tetap berjalan dan hanya grafik ringkasan yang dilewati.
 try:
     import matplotlib
     matplotlib.use("Agg")
@@ -46,10 +13,6 @@ except Exception:
     plt = None
     MATPLOTLIB_OK = False
 
-
-# =========================================================
-# KONFIGURASI CHARUCO BOARD - HARUS SAMA DENGAN SCRIPT 2
-# =========================================================
 SQUARES_X = 5
 SQUARES_Y = 7
 
@@ -60,17 +23,9 @@ MIN_COMMON_CHARUCO_CORNERS = 6
 ARUCO_DICT_ID = aruco.DICT_4X4_50
 ARUCO_DICT_NAME = "DICT_4X4_50"
 
-
-# =========================================================
-# KONFIGURASI SELARAS SCRIPT 06 CAPTURE + SCRIPT 2 INTRINSIK
-# =========================================================
 WIDTH = 640
 HEIGHT = 480
 
-# Script 06 kamu menyimpan frame crop ke charuco_left/charuco_right.
-# Karena itu default-nya input dianggap sudah crop, sehingga tidak di-crop ulang.
-# Jika suatu saat folder berisi gambar full frame, ubah INPUT_SUDAH_CROP_DARI_SCRIPT_06=False
-# dan TERAPKAN_CROP_ULANG=True.
 CROP_AKTIF = True
 SIMPAN_FRAME_CROP = True
 INPUT_SUDAH_CROP_DARI_SCRIPT_06 = True
