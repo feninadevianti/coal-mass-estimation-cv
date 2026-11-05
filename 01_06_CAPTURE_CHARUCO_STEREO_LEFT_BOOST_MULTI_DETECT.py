@@ -4,9 +4,6 @@ import numpy as np
 import os
 import time
 
-# =========================================================
-# KONFIGURASI KAMERA
-# =========================================================
 CAMERA_LEFT = 0
 CAMERA_RIGHT = 1
 
@@ -16,37 +13,11 @@ WIDTH = 640
 HEIGHT = 480
 FPS = 30
 DISPLAY_MIRROR_HORIZONTAL = True
-
-# =========================================================
-# MODE ROI / CROP DIGITAL
-# Tujuan: tampilan tidak terlalu luas dan fokus ke area meja biru muda,
-# sehingga ChArUco board terlihat lebih besar di preview.
-#
-# Format ROI: (x_awal, y_awal, x_akhir, y_akhir) dalam skala 0.0 sampai 1.0.
-# Contoh (0.12, 0.22, 0.88, 0.98) berarti bagian pinggir kiri/kanan
-# dan bagian atas frame dipotong, lalu hasil crop di-resize lagi ke 640x480.
-#
-# Catatan penting:
-# Jika SIMPAN_FRAME_CROP = True, gambar yang disimpan adalah gambar crop-resize.
-# Maka tahap kalibrasi intrinsik, stereo, dan verifikasi berikutnya harus memakai
-# gambar/stream dengan pola crop yang sama agar parameter kamera tetap konsisten.
-# =========================================================
 CROP_AKTIF = True
-
-# Mode aman: crop hanya untuk tampilan/deteksi preview.
-# Gambar yang disimpan tetap full frame asli agar kalibrasi tidak berubah
-# dan tetap cocok untuk penggunaan kamera full frame.
 SIMPAN_FRAME_CROP = True
-
-# ROI khusus untuk setup top-down: tinggi kamera 60 cm, tilt 10-15 derajat, FOV 120 derajat.
-# Tujuan: tetap CROP, tetapi seluruh gerbong 40 cm x 10 cm x 7.5 cm tidak terpotong.
-# Crop dibuat FULL WIDTH: x_awal=0.00 dan x_akhir=1.00, jadi bagian kiri/kanan gerbong tetap aman.
-# Yang dipotong hanya sedikit area atas dan bawah agar tampilan lebih fokus ke area biru muda.
-# Karena SIMPAN_FRAME_CROP=True, tahap kalibrasi dan tahap depth berikutnya harus memakai crop ini secara konsisten.
 ROI_LEFT = (0.00, 0.05, 1.00, 0.95)
 ROI_RIGHT = (0.00, 0.05, 1.00, 0.95)
 
-# Informasi setup fisik sistem
 CAMERA_HEIGHT_CM = 60.0
 CAMERA_TILT_MIN_DEG = 10.0
 CAMERA_TILT_MAX_DEG = 15.0
@@ -56,66 +27,47 @@ GERBONG_PANJANG_CM = 40.0
 GERBONG_LEBAR_CM = 10.0
 GERBONG_TINGGI_CM = 7.5
 
-# Panduan ukuran board di layar.
-# Yang dihitung adalah rasio sisi terpanjang bounding box board terhadap frame.
 TARGET_BOARD_MIN = 0.30
 TARGET_BOARD_MAX = 0.60
 
 TAMPILKAN_KOTAK_PANDUAN = True
 
-# =========================================================
-# PENYAMAAN KUALITAS DETEKSI KIRI-KANAN
-# CLAHE membantu meningkatkan kontras grayscale, terutama jika salah satu kamera
-# tampak ungu/kurang kontras seperti pada kamera kiri.
-# =========================================================
 GUNAKAN_CLAHE = True
 CLAHE_CLIP_LIMIT = 2.0
 CLAHE_TILE_GRID = (8, 8)
 
-# Penajaman ringan hanya untuk proses deteksi, bukan untuk mengubah gambar asli kamera.
 GUNAKAN_SHARPEN_RINGAN = True
 SHARPEN_SIGMA = 1.0
 SHARPEN_AMOUNT = 0.55
 
-# Mode tambahan: mencoba beberapa versi preprocessing lalu memilih hasil ChArUco terbaik.
-# Ini membantu kamera kiri yang lebih lemah tanpa mengubah ukuran crop.
 GUNAKAN_MULTI_DETECT = True
 LEFT_EXTRA_BOOST = True
 LEFT_CONTRAST_ALPHA = 1.35
 LEFT_BRIGHTNESS_BETA = 8
 LEFT_SHARPEN_AMOUNT_EXTRA = 0.85
 
-# Skor ketajaman memakai variasi Laplacian. Nilai ini hanya indikator praktis.
-# Jika kiri sering BLUR, perbaiki fokus/lensa/cahaya sampai skor naik.
 MIN_SHARPNESS_LEFT = 35.0
 MIN_SHARPNESS_RIGHT = 35.0
 BLOKIR_SIMPAN_JIKA_BLUR = False
 
-# Pengaturan kamera ini tidak selalu didukung semua webcam, tetapi aman dicoba.
 SAMAKAN_SETTING_KAMERA = True
 WB_TEMPERATURE = 4500
 BRIGHTNESS_VALUE = 128
 CONTRAST_VALUE = 128
 GAIN_VALUE = 0
 
-# Fitur ini tidak selalu didukung semua webcam. Biarkan False kalau hasil menjadi gelap/aneh.
 GUNAKAN_MANUAL_EXPOSURE = False
 EXPOSURE_VALUE = -6
 KUNCI_AUTOFOCUS = False
 FOCUS_LEFT = 0
 FOCUS_RIGHT = 0
 
-
-# =========================================================
-# KONFIGURASI CHARUCO BOARD SESUAI PUNYAMU
-# =========================================================
 SQUARES_X = 5
 SQUARES_Y = 7
 
 SQUARE_LENGTH = 0.039   # 39 mm, hasil ukur satu kotak penuh
 MARKER_LENGTH = 0.029   # 29 mm, ukur sisi marker ArUco kecil
 
-# Minimal corner agar frame boleh disimpan
 MIN_CHARUCO_CORNERS = 6
 
 # =========================================================
@@ -187,8 +139,6 @@ def mirror_untuk_tampilan(img):
 def samakan_setting_kamera(cap, nama):
     if not SAMAKAN_SETTING_KAMERA:
         return
-
-    # Tidak semua kamera mendukung properti ini. Kalau tidak didukung, OpenCV akan mengabaikan.
     set_property_aman(cap, cv2.CAP_PROP_BRIGHTNESS, BRIGHTNESS_VALUE)
     set_property_aman(cap, cv2.CAP_PROP_CONTRAST, CONTRAST_VALUE)
     set_property_aman(cap, cv2.CAP_PROP_GAIN, GAIN_VALUE)
