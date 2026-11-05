@@ -1,6 +1,6 @@
 # Alur Sistem Estimasi Massa Muatan Batubara
 
-Dokumen ini menjelaskan alur sistem sesuai **diagram alir pada skripsi** (Gambar 3.2 sampai 3.4). Setiap tahap memuat tujuan, dokumentasi visual yang paling penting, dan **gerbang kelayakan** (kriteria yang harus dipenuhi sebelum lanjut ke tahap berikutnya). Hanya dokumentasi yang menjelaskan proses yang ditampilkan di sini. Seluruh hasil lengkap tersedia di folder `hasil_...`.
+Bagian ini menjelaskan alur sistem estimasi massa batu bara pada gerbong kereta. Setiap tahap memuat tujuan, dokumentasi visual yang paling penting, dan **gerbang kelayakan** (kriteria yang harus dipenuhi sebelum lanjut ke tahap berikutnya). Hanya dokumentasi yang menjelaskan proses yang ditampilkan di sini. Seluruh hasil lengkap tersedia di folder `hasil_...`.
 
 Konfigurasi: dua webcam JETE W7 dalam susunan *top-down*, *baseline* 10 cm, miniatur gerbong 40 × 10 × 7,5 cm. Kecuali disebutkan lain, gambar dari tahap 4 sampai 6 berasal dari **satu sampel yang sama**: tumpukan berbentuk gundukan dengan massa aktual 1000 g (`B10_T1000_R02_gundukan`).
 
