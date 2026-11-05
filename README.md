@@ -1,134 +1,118 @@
-# coal-mass-estimation-cv
+<h1 align="center">Coal Mass Estimation CV</h1>
 
-Non-contact coal payload mass estimation prototype using **U-Net semantic segmentation** and **stereo vision depth reconstruction**.
+<p align="center">
+  <b>Estimasi massa muatan batu bara tanpa kontak</b><br>
+  Segmentasi U-Net dan stereo vision pada miniatur gerbong kereta
+</p>
 
-Sistem tanpa kontak sebagai alternatif timbangan rel statis atau sensor mahal untuk mengestimasi massa muatan batu bara pada gerbong. Segmentasi semantik U-Net mengenali area batu bara, sedangkan stereo vision mengukur tinggi tumpukan. Keduanya digabungkan untuk menghitung volume, lalu dikonversi menjadi massa. Sistem diuji pada miniatur skala laboratorium, mulai dari pengumpulan data hingga evaluasi model.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/PyTorch-U--Net-EE4C2C?logo=pytorch&logoColor=white" alt="PyTorch">
+  <img src="https://img.shields.io/badge/OpenCV-Stereo%20Vision-5C3EE8?logo=opencv&logoColor=white" alt="OpenCV">
+</p>
 
-> Proyek ini merupakan bagian dari skripsi Teknik Elektro, Universitas Airlangga.
+<p align="center">
+  <img src="hasil_19_estimasi_massa_semua_model/dashboard_visual_20260704_172156/B10_T1000_R02_gundukan_20260702_133355_dashboard_estimasi.png" width="92%" alt="Dashboard estimasi massa: citra pandangan atas, mask, peta tinggi, dan hasil akhir">
+</p>
 
----
+## Ringkasan
 
-## Hasil Utama (baseline 10 cm)
+Sistem ini mengestimasi massa batu bara pada gerbong **tanpa menyentuh muatan**, sebagai alternatif timbangan rel statis atau sensor yang mahal. Sepasang foto stereo diolah menjadi tinggi tumpukan: U-Net mengenali area batu bara, stereo vision mengukur jaraknya, lalu tinggi tersebut dijumlahkan menjadi volume dan dikonversi menjadi massa. Sistem diuji pada miniatur skala laboratorium dan merupakan bagian dari skripsi Teknik Elektro, Universitas Airlangga.
 
-| Komponen | Hasil |
-|---|---|
-| Segmentasi U-Net (30 citra uji) | IoU 0,9718, Dice 0,9856 |
-| Estimasi massa, seluruh data (66 sampel) | MAE 22,7 g, MAPE 4,1%, R² 0,9978 |
-| Estimasi massa, data uji (13 sampel, 80:20) | MAE 29,1 g, MAPE 4,1% |
+## Hasil utama
 
-Model terbaik adalah ***piecewise linear* + profil tumpukan**. Perbandingan dengan lima model lain ada di [PIPELINE.md](PIPELINE.md#tahap-6-estimasi-massa-skrip-18-sampai-20).
+| IoU segmentasi | Galat kedalaman | MAPE massa | R² massa |
+|:---:|:---:|:---:|:---:|
+| **0,9718** | **0,27 cm** | **4,1%** | **0,9978** |
+| 30 citra uji | MAE, 7 titik uji balok | 66 sampel dan data uji | 0,9960 pada data uji |
 
-![Dashboard estimasi](hasil_19_estimasi_massa_semua_model/dashboard_visual_20260704_172156/B10_T1000_R02_gundukan_20260702_133355_dashboard_estimasi.png)
-
-*Contoh sampel 1000 g (gundukan): estimasi volume 1131,14 cm³ dan massa 1013,97 g.*
-
-![Contoh segmentasi U-Net](hasil_training_unet_colab/preview_test/test_preview_002.png)
-
-*Segmentasi U-Net, dari kiri ke kanan: gambar, ground truth, prediksi, overlay.*
-
----
-
-## Gambaran Sistem
-
-- **Objek uji:** miniatur gerbong batu bara 40 × 10 × 7,5 cm
-- **Kamera:** dua webcam JETE W7, susunan *top-down*, *baseline* 10 cm atau 15 cm
-- **Kalibrasi:** papan ChArUco 7 × 5, kalibrasi intrinsik dan stereo, lalu rektifikasi
-- **Segmentasi:** U-Net biner (batu bara vs latar), 200 citra (140 *train*, 30 *validation*, 30 *test*) dianotasi di Roboflow, dilatih di Google Colab
-- **Tinggi:** peta kedalaman stereo (StereoSGBM) menjadi peta tinggi di dalam area segmentasi
-- **Volume:** integrasi peta tinggi dengan homografi
-- **Massa:** konversi volume ke massa, enam strategi model dibandingkan
+## Cara kerja
 
 ```mermaid
 flowchart LR
-    A[Kalibrasi kamera ChArUco] --> B[Rektifikasi citra stereo]
-    B --> C[Peta kedalaman stereo]
-    D[Dataset dan anotasi] --> E[Training U-Net]
-    E --> F[Mask batu bara]
-    B --> F
-    C --> G[Peta tinggi tumpukan]
-    F --> G
-    G --> H[Volume lewat homografi]
-    H --> I[Estimasi massa]
+    A["1. Kalibrasi stereo"] --> B["2. Depth map dan Z_ref"] --> C["3. Segmentasi U-Net"] --> D["4. Height map"] --> E["5. Volume"] --> F["6. Massa"]
 ```
 
-Penjelasan bergambar tiap tahap, gerbang kelayakan, dan uji akurasi kedalaman ada di **[PIPELINE.md](PIPELINE.md)**.
+Setiap tahap memiliki kriteria kelayakan yang harus dipenuhi sebelum lanjut ke tahap berikutnya.
 
----
+**[Lihat penjelasan bergambar tiap tahap](PIPELINE.md)**
 
-## Cara Menjalankan
+## Sorotan
 
-**Kebutuhan:** Python 3, OpenCV versi *contrib* (modul `aruco`), NumPy, PyTorch, Matplotlib, python-docx. Instal dengan `pip install -r requirements.txt`. Training U-Net dijalankan di Google Colab (notebook pada skrip 12).
+- **Validasi bertahap.** Setiap tahap diperiksa dengan kriteria yang jelas, misalnya RMS kalibrasi < 0,5 px dan IoU > 0,70.
+- **Uji kedalaman dengan balok acuan 5 cm.** Error maksimum 0,55 cm, di bawah batas 1 cm.
+- **Enam model konversi volume ke massa dibandingkan**, dievaluasi pada seluruh data dan pada data uji yang dipisahkan.
 
-**Model dan dataset** tidak disertakan karena ukurannya besar (bobot `model_best.pth` dan dataset Roboflow sekitar 474 MB). Unduh di: **[tautan Google Drive, akan ditambahkan]**
+## Teknologi
 
-1. Jalankan skrip 01 sampai 05 untuk kalibrasi kamera dan rektifikasi.
-2. Siapkan dataset dan model: unduh dari tautan di atas, atau buat sendiri melalui skrip 08 sampai 12 (training pada skrip 12 dijalankan di Google Colab, bukan lokal).
-3. Jalankan skrip 13 untuk segmentasi, lalu skrip 15 dan 16 untuk volume.
-4. Jalankan skrip 18 dan 19 untuk estimasi massa, atau skrip 20 untuk demo *near real-time*.
-
-Sesuaikan jalur (*path*) folder di dalam tiap skrip dengan lokasi berkas di komputer Anda.
+Python · OpenCV (ChArUco, StereoSGBM) · PyTorch (U-Net) · NumPy · Matplotlib · Google Colab · Roboflow
 
 <details>
-<summary><b>Daftar skrip (20)</b></summary>
-
-Skrip diberi nomor sesuai urutan pengerjaan. Ringkasan urutan juga ada di `00_README_URUTAN_ALUR_MASSA.txt`.
-
-| No. | Skrip | Fungsi |
-|---|---|---|
-| 01 | `01_06_CAPTURE_CHARUCO_STEREO_...` | Pengambilan citra ChArUco stereo |
-| 02 | `02_02_kalibrasi_intrinsik_charuco_...` | Kalibrasi intrinsik kamera kiri dan kanan |
-| 03 | `03_03_kalibrasi_stereo_CHARUCO_XML_...` | Kalibrasi stereo (parameter ekstrinsik) |
-| 04 | `04_04_rektifikasi_stereomap_realtime_...` | Rektifikasi dan pembuatan *stereo map* |
-| 05 | `05_15C_evaluasi_kalibrasi_stereo_rektifikasi` | Evaluasi kalibrasi dan rektifikasi |
-| 06 | `06_05_depth_map_...` | Pembuatan peta kedalaman |
-| 07 | `07_05B_evaluasi_stereo_depth_lantai_objek_...` | Evaluasi akurasi kedalaman stereo |
-| 08 | `08_06_akuisisi_dataset_UNET_VARIATIF_200_...` | Akuisisi dataset U-Net |
-| 09 | `09_ROBOFLOW_ANOTASI_MANUAL.txt` | Panduan anotasi manual di Roboflow |
-| 10 | `10_07_preprocess_roboflow_binary_unet_...` | Preprocessing hasil ekspor Roboflow |
-| 11 | `11_08_fix_mask_to_binary_01_...` | Normalisasi *mask* menjadi biner (0/1) |
-| 12 | `12_09_train_unet_binary_batubara_COLAB_...ipynb` | Training U-Net (Google Colab) |
-| 13 | `13_10_inference_unet_batubara_...` | Inferensi segmentasi |
-| 14 | `14_15B_evaluasi_segmentasi_semantik_unet` | Evaluasi segmentasi (IoU, Dice, precision, recall) |
-| 15 | `15_11_integrasi_unet_depth_heightmap_...` | Integrasi segmentasi dan kedalaman menjadi peta tinggi |
-| 16 | `16_12_hitung_volume_homografi_BATCH_...` | Perhitungan volume dengan homografi |
-| 17 | `17_15D_evaluasi_volume_homografi_SELARAS` | Evaluasi volume |
-| 18 | `18_perbandingan_5_model_estimasi_massa` | Perbandingan model konversi volume ke massa |
-| 19 | `19_estimasi_massa_semua_model_NEAR_REALTIME` | Estimasi massa dengan semua model |
-| 20 | `20_16_demo_realtime_volume_massa_PER_BASELINE` | Demo *near real-time* per *baseline* |
-
-</details>
-
-<details>
-<summary><b>Struktur folder hasil</b></summary>
+<summary><b>Isi repositori</b></summary>
 
 | Folder | Isi |
 |---|---|
 | `hasil_kalibrasi/` | Parameter kalibrasi, matriks stereo, dan *stereo map* |
-| `hasil_evaluasi_stereo_05b_mode_ukur/` | Evaluasi pengukuran kedalaman |
-| `hasil_training_unet_colab/` | Kurva training, riwayat training, dan contoh prediksi |
+| `hasil_evaluasi_stereo_05b_mode_ukur/` | Uji kedalaman dengan jarak lantai dan balok acuan |
+| `hasil_training_unet_colab/` | Kurva training dan contoh prediksi U-Net |
 | `hasil_evaluasi_unet/` | Metrik segmentasi per citra dan contoh *overlay* |
-| `hasil_inference_unet/` | Contoh hasil inferensi |
-| `hasil_integrasi_unet_depth/` | Contoh hasil integrasi segmentasi dan kedalaman |
-| `hasil_volume_homografi/` | Contoh hasil perhitungan volume |
+| `hasil_inference_unet/`, `hasil_integrasi_unet_depth/`, `hasil_volume_homografi/` | Contoh hasil inferensi, integrasi, dan volume (hanya beberapa contoh) |
 | `hasil_evaluasi_volume_homografi/` | Evaluasi volume |
-| `hasil_18_perbandingan_5_model_estimasi_massa/` | Perbandingan model estimasi massa |
-| `hasil_18_kalibrasi_empiris_massa/` | Data kalibrasi empiris massa |
-| `hasil_19_estimasi_massa_semua_model/` | Dashboard dan ringkasan estimasi massa |
+| `hasil_18_...`, `hasil_19_...` | Perbandingan model dan dashboard estimasi massa |
 
-Folder `hasil_inference_unet/`, `hasil_integrasi_unet_depth/`, dan `hasil_volume_homografi/` hanya berisi beberapa contoh. Seluruh hasilnya dapat dibuat ulang dengan menjalankan skrip terkait.
+Hasil lengkap dapat dibuat ulang dengan menjalankan skrip terkait.
 
 </details>
 
----
+<details>
+<summary><b>Daftar skrip</b></summary>
+
+Skrip diberi nomor sesuai urutan pengerjaan. Ringkasannya juga ada di `00_README_URUTAN_ALUR_MASSA.txt`.
+
+| No. | Fungsi |
+|---|---|
+| 01 | Pengambilan citra ChArUco stereo |
+| 02 | Kalibrasi intrinsik kamera kiri dan kanan |
+| 03 | Kalibrasi stereo |
+| 04 | Rektifikasi dan pembuatan *stereo map* |
+| 05 | Evaluasi kalibrasi dan rektifikasi |
+| 06 | Pembuatan depth map |
+| 07 | Evaluasi akurasi kedalaman (jarak lantai dan balok) |
+| 08 | Akuisisi dataset U-Net |
+| 09 | Panduan anotasi manual di Roboflow |
+| 10 | Preprocessing hasil ekspor Roboflow |
+| 11 | Normalisasi *mask* menjadi biner |
+| 12 | Training U-Net (Google Colab) |
+| 13 | Inferensi segmentasi |
+| 14 | Evaluasi segmentasi (IoU, Dice, precision, recall) |
+| 15 | Integrasi segmentasi dan kedalaman menjadi height map |
+| 16 | Perhitungan volume dengan homografi |
+| 17 | Evaluasi volume |
+| 18 | Perbandingan model konversi volume ke massa |
+| 19 | Estimasi massa dengan semua model |
+| 20 | Demo *near real-time* |
+
+</details>
+
+## Model dan dataset
+
+Bobot model U-Net dan dataset tidak disertakan karena ukurannya besar. Tautan unduhan: **[akan ditambahkan]**
+
+## Menjalankan
+
+1. Pasang kebutuhan: `pip install -r requirements.txt`
+2. Jalankan skrip 01 sampai 05 untuk kalibrasi kamera dan rektifikasi.
+3. Siapkan model dan dataset (unduh dari tautan di atas, atau buat sendiri melalui skrip 08 sampai 12; skrip 12 dijalankan di Google Colab).
+4. Jalankan skrip 13 dan 15 sampai 16 untuk segmentasi dan volume, lalu skrip 18 dan 19 untuk estimasi massa, atau skrip 20 untuk demo.
+
+Sesuaikan jalur (*path*) folder di dalam tiap skrip dengan lokasi berkas di komputer Anda.
 
 ## Keterbatasan
 
-- Diuji pada miniatur skala laboratorium, bukan gerbong sungguhan. Kondisi lapangan (pencahayaan, debu, getaran) belum diuji.
-- Hasil di repositori ini memakai *baseline* 10 cm. Konfigurasi 15 cm baru diuji pada tahap kalibrasi, sehingga pengaruh *baseline* terhadap akurasi belum dapat dibandingkan.
-- Evaluasi data uji memakai satu pembagian 80:20 (13 sampel); validasi silang berulang masih diperlukan.
+- Sistem diuji pada miniatur skala laboratorium; kondisi lapangan (debu, getaran, pencahayaan, dan ukuran gerbong sebenarnya) belum diuji.
+- Hasil di repositori ini menggunakan *baseline* 10 cm. Konfigurasi 15 cm baru diuji pada tahap kalibrasi, sehingga pengaruh *baseline* terhadap akurasi belum dapat dibandingkan.
+- Evaluasi pada data uji memakai satu pembagian 80:20 (13 sampel); validasi silang berulang masih diperlukan.
 
 ---
 
-## Penulis
-
-Enina Devianti Farid, Teknik Elektro, Universitas Airlangga.
+<p align="center"><sub>Enina Devianti Farid · Teknik Elektro, Universitas Airlangga</sub></p>

@@ -1,101 +1,110 @@
-# Alur Sistem Estimasi Massa Muatan Batubara
+# Alur Sistem Estimasi Massa Muatan Batu Bara
 
-Bagian ini menjelaskan alur sistem estimasi massa batu bara pada gerbong kereta. Setiap tahap memuat tujuan, dokumentasi visual yang paling penting, dan **gerbang kelayakan** (kriteria yang harus dipenuhi sebelum lanjut ke tahap berikutnya). Hanya dokumentasi yang menjelaskan proses yang ditampilkan di sini. Seluruh hasil lengkap tersedia di folder `hasil_...`.
+Bagian ini menjelaskan alur sistem estimasi massa batu bara pada gerbong kereta, dari foto stereo sampai angka massa. Setiap tahap memiliki **gerbang kelayakan**: kriteria yang harus dipenuhi sebelum lanjut ke tahap berikutnya.
 
-Konfigurasi: dua webcam JETE W7 dalam susunan *top-down*, *baseline* 10 cm, miniatur gerbong 40 × 10 × 7,5 cm. Kecuali disebutkan lain, gambar dari tahap 4 sampai 6 berasal dari **satu sampel yang sama**: tumpukan berbentuk gundukan dengan massa aktual 1000 g (`B10_T1000_R02_gundukan`).
+Konfigurasi: dua webcam JETE W7, *baseline* 10 cm, miniatur gerbong 40 × 10 × 7,5 cm. Gambar tahap 4 sampai 6 berasal dari satu sampel yang sama (gundukan, massa aktual 1000 g).
 
-## Diagram alir ringkas
+Bagian dengan segitiga di sisi kirinya dapat dibuka untuk melihat detail tambahan.
 
 ```mermaid
-flowchart TD
-    S([Mulai]) --> T1["1. Kalibrasi dan rektifikasi stereo"]
-    T1 --> G1{"Kalibrasi layak?"}
-    G1 -- "Tidak: perbanyak pose, perbaiki cahaya" --> T1
-    G1 -- Ya --> T2["2. Depth map dan Z_ref"]
-    T2 --> U["Uji akurasi: jarak lantai dan balok acuan 5 cm"]
-    U --> G2{"Stereo vision valid?"}
-    G2 -- "Tidak: perbaiki cahaya dan posisi" --> T2
-    G2 -- Ya --> T3["3. Dataset dan pelatihan U-Net"]
-    T3 --> G3{"Segmentasi layak?"}
-    G3 -- "Tidak: tambah data, latih ulang" --> T3
-    G3 -- Ya --> T4["4. Integrasi mask + depth + Z_ref menjadi height map"]
-    T4 --> G4{"Height map valid?"}
-    G4 -- "Tidak: evaluasi mask, depth, Z_ref" --> T2
-    G4 -- Ya --> T5["5. Volume: homografi dan integrasi diskrit"]
-    T5 --> G5{"Volume valid?"}
-    G5 -- "Tidak: ulangi ROI" --> T5
-    G5 -- Ya --> T6["6. Kalibrasi empiris volume ke massa"]
-    T6 --> G6{"Estimasi massa akurat?"}
-    G6 -- "Tidak: perbaiki model" --> T6
-    G6 -- Ya --> E([Analisis data dan selesai])
+flowchart LR
+    A["1. Kalibrasi stereo"] --> B["2. Depth map dan Z_ref"] --> C["3. Segmentasi U-Net"] --> D["4. Height map"] --> E["5. Volume"] --> F["6. Massa"]
 ```
 
-| Gerbang | Kriteria lolos | Hasil penelitian |
+<details>
+<summary><b>Kriteria kelayakan tiap tahap</b></summary>
+
+| Tahap | Kriteria lolos | Hasil |
 |---|---|---|
-| 1. Kalibrasi | RMS < 0,5 px; sudut ChArUco terdeteksi ≥ 15; garis epipolar sejajar; ROI tetap terlihat | RMS stereo 0,3848 px (lolos) |
-| 2. Stereo vision | Error < 1 cm; piksel valid ≥ 85%; tampilan depth stabil | Error maksimum 0,55 cm; piksel valid 100% (lolos) |
-| 3. Segmentasi | IoU > 0,70; Dice > 0,70; Pixel Accuracy > 95% | IoU 0,9718; Dice 0,9856 (lolos) |
-| 4. Height map | Piksel height valid ≥ 70%; ROI lantai sesuai; tinggi 0 sampai 12 cm | Rata-rata 92,83% valid (lolos) |
-| 5. Volume | ≥ 20 piksel valid; ROI 40 × 10 cm; volume normal ≤ 3000 cm³, *overload* ringan > 3000 sampai 4800 cm³ | 66 sampel valid |
-| 6. Estimasi massa | MAPE ≤ 10 sampai 20%; R² ≥ 90%; MAE ≤ 300 g; RMSE ≤ 400 g | MAPE 4,1%; R² 0,9978 (lolos) |
+| 1. Kalibrasi | RMS < 0,5 px; sudut ChArUco ≥ 15; garis epipolar sejajar | RMS stereo 0,3848 px |
+| 2. Stereo vision | Error < 1 cm; piksel valid ≥ 85% | Error maksimum 0,55 cm; piksel valid 100% |
+| 3. Segmentasi | IoU > 0,70; Dice > 0,70; Pixel Accuracy > 95% | IoU 0,9718; Dice 0,9856 |
+| 4. Height map | Piksel height valid ≥ 70%; tinggi 0 sampai 12 cm | Rata-rata 92,83% valid |
+| 5. Volume | ≥ 20 piksel valid; ROI 40 × 10 cm | 66 sampel valid |
+| 6. Massa | MAPE ≤ 10 sampai 20%; R² ≥ 90%; MAE ≤ 300 g; RMSE ≤ 400 g | MAPE 4,1%; R² 0,9978 |
+
+</details>
+
+<p align="center">
+<a href="#1-kalibrasi-dan-rektifikasi-stereo">1 Kalibrasi</a> &nbsp;·&nbsp; <a href="#2-depth-map-z_ref-dan-uji-balok-acuan">2 Depth dan uji balok</a> &nbsp;·&nbsp; <a href="#3-segmentasi-batu-bara-dengan-u-net">3 Segmentasi</a> &nbsp;·&nbsp; <a href="#4-integrasi-menjadi-height-map">4 Height map</a> &nbsp;·&nbsp; <a href="#5-perhitungan-volume">5 Volume</a> &nbsp;·&nbsp; <a href="#6-estimasi-massa">6 Massa</a>
+</p>
 
 ---
 
-## Tahap 1. Kalibrasi dan rektifikasi stereo (skrip 01 sampai 05)
+## 1. Kalibrasi dan rektifikasi stereo
 
-**Tujuan:** membuat dua kamera dapat dipakai sebagai satu alat ukur kedalaman.
+*Skrip 01 sampai 05.* Dua kamera dikalibrasi dengan papan ChArUco sehingga dapat dipakai sebagai satu alat ukur kedalaman. Rektifikasi kemudian meluruskan kedua gambar, sehingga titik yang sama berada pada baris piksel yang sama (garis hijau horizontal di kanan).
 
-Dua webcam dipasang berjarak 10 cm (*baseline*) dengan kemiringan 10 sampai 15°, menghadap gerbong dari atas.
+<table>
+<tr>
+<td width="50%"><img src="docs/img/04_hasil_kalibrasi_stereo.png" alt="Hasil kalibrasi stereo"></td>
+<td width="50%"><img src="docs/img/05_rektifikasi_garis_epipolar.png" alt="Rektifikasi dan garis epipolar"></td>
+</tr>
+<tr>
+<td align="center"><sub>Ringkasan kalibrasi: RMS 0,3848 px, baseline terkalibrasi 100,14 mm</sub></td>
+<td align="center"><sub>Sebelum dan sesudah rektifikasi</sub></td>
+</tr>
+</table>
 
-![Konfigurasi kamera](docs/img/01_konfigurasi_kamera.png)
+**Hasil:** baseline hasil kalibrasi hanya berselisih 0,14% dari nominal 10 cm.
 
-![Setup laboratorium](docs/img/02_setup_laboratorium.png)
+<details>
+<summary><b>Setup kamera dan deteksi ChArUco</b></summary>
 
-Papan ChArUco (7 × 5 kotak, kotak 39 mm, marker 29 mm) difoto dari berbagai pose. Sudut dan ID marker yang terdeteksi ditandai pada gambar, dan status deteksi ditampilkan sebagai VALID bila jumlah sudut cukup.
+<table>
+<tr>
+<td width="34%"><img src="docs/img/01_konfigurasi_kamera.png" alt="Konfigurasi kamera"></td>
+<td width="33%"><img src="docs/img/02_setup_laboratorium.png" alt="Setup laboratorium"></td>
+<td width="33%"><img src="docs/img/03_deteksi_charuco.png" alt="Deteksi ChArUco"></td>
+</tr>
+<tr>
+<td align="center"><sub>Konfigurasi kamera top-down</sub></td>
+<td align="center"><sub>Setup di laboratorium</sub></td>
+<td align="center"><sub>Deteksi sudut ChArUco (VALID)</sub></td>
+</tr>
+</table>
 
-![Deteksi ChArUco](docs/img/03_deteksi_charuco.png)
+Papan ChArUco berukuran 7 × 5 kotak (kotak 39 mm, marker 29 mm) difoto dari berbagai pose.
 
-Kalibrasi intrinsik dan stereo menghasilkan parameter kamera dan geometri pasangan kamera. Baseline hasil kalibrasi 100,14 mm hanya berselisih 0,14% dari nominal 10 cm.
-
-![Hasil kalibrasi stereo](docs/img/04_hasil_kalibrasi_stereo.png)
-
-**Rektifikasi** meluruskan kedua gambar sehingga titik yang sama berada pada baris piksel yang sama. Garis hijau horizontal menunjukkan garis epipolar yang sudah sejajar.
-
-![Rektifikasi dan garis epipolar](docs/img/05_rektifikasi_garis_epipolar.png)
+</details>
 
 ---
 
-## Tahap 2. Depth map, Z_ref, dan uji balok acuan (skrip 06 dan 07)
+## 2. Depth map, Z_ref, dan uji balok acuan
 
-**Tujuan:** mengukur jarak setiap titik dari kamera, lalu memastikan pengukuran itu cukup akurat sebelum dipakai untuk muatan.
-
-Algoritma **StereoSGBM** mencari pergeseran posisi (*disparity*) tiap titik antara gambar kiri dan kanan, lalu mengonversinya menjadi jarak. Tinggi muatan tidak dibaca langsung dari depth map, tetapi dari selisih antara bidang dasar gerbong dan permukaan material:
+*Skrip 06 dan 07.* Algoritma **StereoSGBM** mengubah selisih posisi titik pada gambar kiri dan kanan menjadi jarak. Tinggi muatan diperoleh dari selisih antara lantai gerbong dan permukaan material:
 
 ```
 tinggi = Z_ref - kedalaman permukaan
 ```
 
-**Penetapan Z_ref.** Pada gerbong kosong, pengguna memilih ROI lantai (kotak kuning). Nilai median kedalaman yang robust disimpan sebagai Z_ref, dan status VALID hanya muncul bila jumlah piksel, kestabilan depth, dan rentang jarak memenuhi kriteria.
+Z_ref (jarak ke lantai gerbong kosong) ditetapkan lebih dulu pada ROI kuning. Ketelitiannya kemudian diuji dengan **balok kertas setinggi 5 cm** pada ROI biru sebelum sistem dipakai untuk batu bara.
 
-![Mode lantai kosong untuk menentukan Z_ref](docs/img/06_mode_lantai_kosong_zref.png)
+<table>
+<tr>
+<td width="50%"><img src="docs/img/06_mode_lantai_kosong_zref.png" alt="Mode lantai kosong"></td>
+<td width="50%"><img src="docs/img/07_mode_balok_acuan.png" alt="Mode balok acuan"></td>
+</tr>
+<tr>
+<td align="center"><sub>Penetapan Z_ref pada gerbong kosong</sub></td>
+<td align="center"><sub>Uji tinggi dengan balok acuan 5 cm</sub></td>
+</tr>
+</table>
 
-### Uji akurasi dengan balok acuan
+**Hasil dari 7 titik uji:** error maksimum **0,55 cm** (batas 1 cm), MAE 0,273 cm, piksel valid 100%. Nilai sistem selalu sedikit di atas nilai aktual (bias sekitar +0,16 cm pada jarak lantai dan +0,32 cm pada tinggi balok). Bias kecil ini dapat terakumulasi saat dijumlahkan menjadi volume.
 
-Sebelum dipakai untuk batubara, ketelitian pengukuran diuji pada objek yang ukurannya diketahui: **balok kertas setinggi 5 cm** dan jarak lantai gerbong kosong (55,5 cm). Pada mode balok acuan, ROI kecil (kotak biru) ditempatkan di permukaan balok. Sistem menghitung tinggi balok dari selisih Z_ref dan kedalaman permukaan balok, lalu membandingkannya dengan nilai aktual.
+<details>
+<summary><b>Tabel tujuh titik uji, grafik, dan perbandingan depth map</b></summary>
 
-![Mode balok acuan](docs/img/07_mode_balok_acuan.png)
-
-Pengujian memakai tujuh titik: dua pengukuran jarak lantai dan lima pengukuran tinggi balok.
-
-| No. | Jenis uji | Aktual (cm) | Sistem (cm) | Error (cm) | Piksel valid |
-|---|---|---|---|---|---|
-| 1 | Jarak lantai | 55,50 | 55,66 | 0,16 | 100% |
-| 2 | Jarak lantai | 55,50 | 55,66 | 0,16 | 100% |
-| 3 | Tinggi balok | 5,00 | 5,02 | 0,02 | 100% |
-| 4 | Tinggi balok | 5,00 | 5,47 | 0,47 | 100% |
-| 5 | Tinggi balok | 5,00 | 5,33 | 0,33 | 100% |
-| 6 | Tinggi balok | 5,00 | 5,21 | 0,21 | 100% |
-| 7 | Tinggi balok | 5,00 | 5,55 | 0,55 | 100% |
+| No. | Jenis uji | Aktual (cm) | Sistem (cm) | Error (cm) |
+|---|---|---|---|---|
+| 1 | Jarak lantai | 55,50 | 55,66 | 0,16 |
+| 2 | Jarak lantai | 55,50 | 55,66 | 0,16 |
+| 3 | Tinggi balok | 5,00 | 5,02 | 0,02 |
+| 4 | Tinggi balok | 5,00 | 5,47 | 0,47 |
+| 5 | Tinggi balok | 5,00 | 5,33 | 0,33 |
+| 6 | Tinggi balok | 5,00 | 5,21 | 0,21 |
+| 7 | Tinggi balok | 5,00 | 5,55 | 0,55 |
 
 | Kategori | Jumlah data | MAE (cm) | RMSE (cm) | MAPE (%) |
 |---|---|---|---|---|
@@ -103,79 +112,112 @@ Pengujian memakai tujuh titik: dua pengukuran jarak lantai dan lima pengukuran t
 | Tinggi balok | 5 | 0,317 | 0,368 | 6,33 |
 | Keseluruhan | 7 | 0,273 | 0,323 | 4,61 |
 
-![Error per titik uji](hasil_evaluasi_stereo_05b_mode_ukur/grafik_error_05b_mode_ukur.png)
+<table>
+<tr>
+<td width="50%"><img src="hasil_evaluasi_stereo_05b_mode_ukur/grafik_error_05b_mode_ukur.png" alt="Error per titik uji"></td>
+<td width="50%"><img src="hasil_evaluasi_stereo_05b_mode_ukur/grafik_sistem_vs_aktual_05b_mode_ukur.png" alt="Sistem terhadap aktual"></td>
+</tr>
+</table>
 
-![Nilai sistem terhadap nilai aktual](hasil_evaluasi_stereo_05b_mode_ukur/grafik_sistem_vs_aktual_05b_mode_ukur.png)
-
-Perbandingan titik dengan error terendah (titik 3) dan tertinggi (titik 7) menunjukkan bahwa selisih terutama berasal dari pergeseran median kedalaman ketika posisi ROI berpindah, bukan dari berkurangnya piksel valid:
+Depth map pada titik dengan error terendah (titik 3) dan tertinggi (titik 7). Selisihnya terutama berasal dari pergeseran median kedalaman ketika posisi ROI berpindah, bukan dari berkurangnya piksel valid:
 
 ![Depth map titik 3 dan titik 7](docs/img/08_balok_titik3_vs_titik7.png)
 
-**Hasil:** semua titik memiliki error di bawah 1 cm (maksimum 0,55 cm) dan piksel valid 100%, sehingga **gerbang 2 terpenuhi**. Nilai sistem selalu sedikit di atas nilai aktual (bias sekitar +0,16 cm pada jarak lantai dan +0,32 cm pada tinggi balok). Bias kecil ini perlu diperhatikan karena dapat terakumulasi ketika seluruh area mask dijumlahkan menjadi volume.
+</details>
 
 ---
 
-## Tahap 3. Dataset dan segmentasi U-Net (skrip 08 sampai 14)
+## 3. Segmentasi batu bara dengan U-Net
 
-**Tujuan:** menentukan piksel mana yang merupakan batubara, supaya tinggi hanya dihitung pada area muatan dan bukan pada dinding gerbong atau lantai.
-
-Dataset berisi **200 citra kiri terektifikasi** (640 × 480 piksel) yang dikumpulkan bertahap dari gerbong kosong sampai *overload* ringan, dengan variasi profil permukaan (rata, dominan satu sisi, gundukan, asimetris).
-
-![Variasi kondisi muatan pada dataset](docs/img/09_kondisi_dataset.png)
-
-Area batubara dianotasi manual di Roboflow, lalu diubah menjadi **mask biner** (putih = batubara, hitam = latar). Gerbong kosong dipertahankan dengan mask kosong agar model belajar menolak latar belakang.
-
-![Tahapan anotasi](docs/img/10_anotasi_roboflow.png)
-
-Data dibagi 70% *training* (140), 15% *validation* (30), dan 15% *testing* (30). Augmentasi hanya diterapkan pada data *training*. U-Net dilatih di Google Colab.
-
-![Kurva training](hasil_training_unet_colab/curves_training.png)
-
-*Metrik validasi sempat turun tajam pada epoch 6, lalu pulih dan stabil.*
-
-Pada 30 citra uji, model mencapai **IoU 0,9718 dan Dice 0,9856**, sehingga **gerbang 3 terpenuhi**. Dari kiri ke kanan: gambar asli, mask acuan, mask prediksi, dan *overlay*.
+*Skrip 08 sampai 14.* U-Net menandai piksel mana yang merupakan batu bara, supaya tinggi hanya dihitung pada area muatan dan bukan pada dinding atau lantai gerbong. Dataset terdiri dari 200 citra yang dianotasi manual di Roboflow dan dibagi 140 *training*, 30 *validation*, dan 30 *testing*.
 
 ![Contoh hasil segmentasi](hasil_training_unet_colab/preview_test/test_preview_002.png)
 
+<sub>Dari kiri ke kanan: gambar asli, mask acuan, mask prediksi, dan overlay prediksi.</sub>
+
+**Hasil pada 30 citra uji:** IoU **0,9718** dan Dice **0,9856**.
+
+<details>
+<summary><b>Dataset, anotasi, dan kurva training</b></summary>
+
+![Variasi kondisi muatan pada dataset](docs/img/09_kondisi_dataset.png)
+
+![Tahapan anotasi](docs/img/10_anotasi_roboflow.png)
+
+![Kurva training](hasil_training_unet_colab/curves_training.png)
+
+Metrik validasi sempat turun tajam pada epoch 6, lalu pulih dan stabil.
+
+</details>
+
 ---
 
-## Tahap 4. Integrasi menjadi height map (skrip 15)
+## 4. Integrasi menjadi height map
 
-**Tujuan:** menggabungkan "di mana batubara" (mask U-Net) dengan "seberapa jauh dari kamera" (depth map) menjadi **peta tinggi**. Untuk setiap piksel di dalam mask, tinggi dihitung sebagai `Z_ref - kedalaman`. Piksel di luar mask diabaikan.
-
-Seluruh proses ditampilkan dalam satu dashboard:
+*Skrip 15.* Mask U-Net ("di mana batu bara") digabungkan dengan depth map ("seberapa jauh dari kamera") menjadi peta tinggi. Untuk setiap piksel di dalam mask, tinggi dihitung sebagai `Z_ref - kedalaman`. Seluruh proses ditampilkan dalam satu dashboard:
 
 ![Dashboard integrasi](hasil_integrasi_unet_depth/B10_T1000_R02_gundukan_20260702_133355_dashboard.png)
 
-*Baris atas: gambar kiri dan kanan terektifikasi serta overlay mask. Baris bawah: mask U-Net, peta kedalaman, dan peta tinggi. Panel di bawahnya memuat statistik (tinggi rata-rata 4,09 cm, tinggi representatif P98 9,03 cm, 17.989 piksel batubara, 92,4% piksel tinggi valid) dan status kualitas data.*
+<sub>Baris atas: gambar kiri, kanan, dan overlay mask. Baris bawah: mask U-Net, peta kedalaman, dan peta tinggi. Panel bawah memuat statistik dan status kualitas data.</sub>
 
-**Gerbang 4:** pada 66 sampel, persentase piksel height valid berkisar 80,05% sampai 99,33% (rata-rata 92,83%), di atas ambang 70%.
+**Hasil:** pada 66 sampel, rata-rata 92,83% piksel height valid (batas minimum 70%).
 
 ---
 
-## Tahap 5. Perhitungan volume (skrip 16 dan 17)
+## 5. Perhitungan volume
 
-**Tujuan:** mengubah peta tinggi menjadi volume dalam satuan nyata.
-
-Area gerbong diubah dengan **homografi** menjadi pandangan dari atas (*top-view*) berukuran 400 × 100 piksel sesuai dasar gerbong 40 × 10 cm, sehingga 1 piksel mewakili 1 mm².
-
-![Transformasi homografi ke top-view](docs/img/11_homografi_topview.png)
-
-Volume dihitung dengan menjumlahkan `tinggi × luas piksel` pada seluruh piksel valid.
+*Skrip 16 dan 17.* Area gerbong diubah dengan **homografi** menjadi pandangan dari atas berukuran 400 × 100 piksel (1 piksel mewakili 1 mm²). Volume diperoleh dengan menjumlahkan `tinggi × luas piksel` pada seluruh piksel valid.
 
 ![Dashboard volume](hasil_volume_homografi/volume_B10_T1000_R02_gundukan_20260702_133355_20260704_123716_dashboard.png)
 
-*Hasil sampel: volume 1131,14 cm³ dari 27.531 piksel valid.*
+<sub>Hasil sampel: volume 1131,14 cm³ dari 27.531 piksel valid.</sub>
 
-Volume sistem berhubungan erat dengan massa aktual, tetapi hubungannya tidak sepenuhnya seragam untuk semua profil muatan:
+<details>
+<summary><b>Transformasi homografi dan hubungan volume dengan massa</b></summary>
 
-![Volume dan massa aktual menurut profil muatan](docs/img/12_volume_vs_massa_profil.png)
+<table>
+<tr>
+<td width="50%"><img src="docs/img/11_homografi_topview.png" alt="Homografi ke top-view"></td>
+<td width="50%"><img src="docs/img/12_volume_vs_massa_profil.png" alt="Volume dan massa aktual menurut profil"></td>
+</tr>
+<tr>
+<td align="center"><sub>Gambar kiri dengan ROI menjadi pandangan atas</sub></td>
+<td align="center"><sub>Hubungan volume dan massa menurut profil muatan</sub></td>
+</tr>
+</table>
+
+</details>
 
 ---
 
-## Tahap 6. Estimasi massa (skrip 18 sampai 20)
+## 6. Estimasi massa
 
-**Tujuan:** mengonversi volume menjadi massa. Enam model dibandingkan, dari densitas tetap sampai regresi *piecewise* yang memanfaatkan profil tumpukan.
+*Skrip 18 sampai 20.* Volume dikonversi menjadi massa. Enam model dibandingkan secara bertahap: dimulai dari asumsi fisika paling sederhana (massa = densitas × volume), lalu setiap model menambahkan satu hal, yaitu kalibrasi dari data, kelengkungan hubungan volume dan massa, serta bentuk muatan.
+
+| Model | Cara menghitung | Variabel yang dipakai |
+|---|---|---|
+| 1. Densitas manual | massa = 0,83 g/cm³ × volume | volume |
+| 2. Densitas empiris | massa = 0,959 g/cm³ × volume (median massa per volume dari data) | volume |
+| 3. *Linear regression* | satu garis lurus: massa = 0,892 × volume + 76,2 | volume |
+| 4. *Piecewise linear* | garis berbeda untuk tiga rentang volume (< 647, 647 sampai 1419, dan > 1419 cm³) | volume |
+| 5. *Multiple regression* + profil | regresi dari beberapa ukuran geometri dan bentuk muatan | volume, tinggi (rata-rata, median, maksimum, P95, P98), piksel valid, luas area, profil muatan |
+| 6. ***Piecewise linear* + profil** | seperti model 4, ditambah koreksi menurut bentuk muatan | volume, profil muatan |
+
+<sub>Profil muatan adalah bentuk permukaan tumpukan (rata, gundukan, atau asimetris). Data kalibrasi terdiri dari 66 sampel dengan massa 50 sampai 2100 g yang ditimbang dengan timbangan digital. Model 2 sampai 6 menyesuaikan parameternya pada data ini, sedangkan model 1 memakai densitas tetap.</sub>
+
+Model utama adalah ***piecewise linear* + profil**. Hasil akhir pada sampel contoh:
+
+![Dashboard estimasi massa](hasil_19_estimasi_massa_semua_model/dashboard_visual_20260704_172156/B10_T1000_R02_gundukan_20260702_133355_dashboard_estimasi.png)
+
+<sub>Dari kiri ke kanan: citra pandangan atas, mask, peta tinggi, dan hasil akhir. Sampel ini diestimasi 1013,97 g dari massa aktual 1000 g (selisih sekitar 1,4%).</sub>
+
+| | MAE | MAPE | R² |
+|---|---|---|---|
+| Seluruh data (66 sampel) | 22,7 g | 4,1% | 0,9978 |
+| Data uji (13 sampel, 80:20) | 29,1 g | 4,1% | 0,9960 |
+
+<details>
+<summary><b>Perbandingan hasil keenam model dan cara menilainya</b></summary>
 
 | Peringkat | Model | MAE (g), 66 sampel | MAPE, 66 sampel | MAE uji (g), 13 sampel | MAPE uji, 13 sampel |
 |---|---|---|---|---|---|
@@ -184,24 +226,26 @@ Volume sistem berhubungan erat dengan massa aktual, tetapi hubungannya tidak sep
 | 3 | *Piecewise linear* | 46,20 | 7,07% | 44,22 | 6,07% |
 | 4 | *Linear regression* | 67,61 | 19,45% | 61,11 | 12,46% |
 | 5 | Densitas empiris | 76,14 | 10,13% | 78,84 | 9,86% |
-| 6 | Densitas manual | 145,53 | 15,15% | 145,50 | 15,50% |
+| 6 | Densitas manual (0,83 g/cm³) | 145,53 | 15,15% | 145,50 | 15,50% |
 
-Kolom "66 sampel" menunjukkan kemampuan model mencocokkan seluruh data, sedangkan kolom "uji" dihitung pada 13 sampel (20%) yang tidak dipakai saat pencocokan parameter. Model *piecewise linear* + profil dipilih sebagai model utama karena MAPE dan RMSE uji terendah, meskipun MAE ujinya sedikit lebih tinggi daripada *multiple regression* + profil. Model terbaik mencapai R² 0,9978 pada seluruh data.
+**Cara menilai**
+
+- **MAE**: rata-rata selisih absolut antara massa sistem dan timbangan (gram).
+- **MAPE**: rata-rata selisih relatif terhadap massa aktual (%).
+- **R²**: tingkat kecocokan model dengan data, 1 berarti sempurna.
+- **Data uji**: 13 sampel (20%) dipisahkan terlebih dulu. Parameter model dicocokkan hanya pada 53 sampel lainnya, sehingga hasilnya menggambarkan kemampuan memprediksi sampel baru.
+- **Peringkat**: jumlah ranking lima indikator (MAE, RMSE, MAPE, R², dan banyaknya sampel dengan error tinggi) pada seluruh data.
+
+Model *piecewise linear* + profil dipilih karena MAPE dan RMSE ujinya terendah.
 
 ![Perbandingan MAE, RMSE, dan MAPE](hasil_18_perbandingan_5_model_estimasi_massa/00_ringkasan_hasil/00_ranking_mae_rmse_mape.png)
 
-Hasil akhir pada sampel contoh: sistem mengestimasi **massa 1013,97 g** dari massa aktual 1000 g (selisih sekitar 1,4%).
-
-![Dashboard estimasi massa](hasil_19_estimasi_massa_semua_model/dashboard_visual_20260704_172156/B10_T1000_R02_gundukan_20260702_133355_dashboard_estimasi.png)
-
-*Dari kiri ke kanan: citra pandangan atas, area mask, peta tinggi, dan hasil akhir (volume, massa, dan model yang dipakai).*
-
-**Gerbang 6 terpenuhi:** MAPE 4,1% (batas 10 sampai 20%), R² 0,9978 (batas 90%), MAE 22,7 g (batas 300 g), dan RMSE 29,4 g (batas 400 g).
+</details>
 
 ---
 
-## Catatan keterbatasan
+## Keterbatasan
 
-- Evaluasi massa memakai satu pembagian 80:20 dengan 13 sampel uji. Validasi silang berulang masih diperlukan untuk menilai kestabilan performa.
-- Sistem diuji pada miniatur skala laboratorium. Kondisi lapangan (debu, getaran, pencahayaan, dan ukuran gerbong sebenarnya) belum diuji.
-- Konfigurasi *baseline* 15 cm baru diuji pada tahap kalibrasi. Perbandingan akurasi volume dan massa antara *baseline* 10 cm dan 15 cm belum dapat dilakukan.
+- Evaluasi massa memakai satu pembagian 80:20 (13 sampel uji). Validasi silang berulang masih diperlukan.
+- Sistem diuji pada miniatur skala laboratorium; kondisi lapangan belum diuji.
+- *Baseline* 15 cm baru diuji pada tahap kalibrasi, sehingga perbandingan akurasi volume dan massa antar-*baseline* belum dapat dilakukan.
