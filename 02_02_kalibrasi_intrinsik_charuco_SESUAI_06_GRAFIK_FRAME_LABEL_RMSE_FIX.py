@@ -1,26 +1,3 @@
-"""
-SCRIPT 2 - KALIBRASI INTRINSIK CHARUCO - calibrateCameraCharuco XML + GRAFIK
-DISELARASKAN DENGAN SCRIPT 06_CAPTURE_CHARUCO_STEREO_LEFT_BOOST_MULTI_DETECT
-==========================================================================
-
-Fungsi utama:
-1. Kalibrasi intrinsik kamera kiri dan kanan dengan aruco.calibrateCameraCharuco()
-2. Menyimpan hasil intrinsik ke file XML
-3. Menyimpan preview deteksi ChArUco
-4. Menyimpan visualisasi hasil dalam bentuk gambar/grafik, meliputi:
-   - grafik batang mean reprojection error kiri vs kanan
-   - grafik batang RMS error kiri vs kanan
-   - grafik error per frame untuk masing-masing kamera
-   - gambar ringkasan intrinsik untuk masing-masing kamera
-   - gambar dashboard ringkasan akhir
-
-Catatan:
-- Script ini membutuhkan OpenCV contrib yang memiliki aruco.calibrateCameraCharuco()
-- Script ini juga membutuhkan matplotlib untuk menyimpan grafik.
-
-Cara pakai:
-python 02_kalibrasi_intrinsik_charuco_SESUAI_06_CROP_MULTI_DETECT.py
-"""
 
 import cv2
 from cv2 import aruco
@@ -60,10 +37,6 @@ ARUCO_DICT_NAME = "DICT_4X4_50"
 WIDTH = 640
 HEIGHT = 480
 
-# Script 06 menyimpan frame crop ke charuco_left/charuco_right.
-# Karena itu default-nya gambar input dianggap SUDAH crop, sehingga tidak perlu crop ulang.
-# Jika kamu memakai gambar full frame, ubah INPUT_SUDAH_CROP_DARI_SCRIPT_06=False
-# dan TERAPKAN_CROP_ULANG=True.
 CROP_AKTIF = True
 SIMPAN_FRAME_CROP = True
 INPUT_SUDAH_CROP_DARI_SCRIPT_06 = True
