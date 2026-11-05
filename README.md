@@ -12,55 +12,31 @@ Sistem tanpa kontak sebagai alternatif timbangan rel statis atau sensor mahal un
 
 | Komponen | Hasil |
 |---|---|
-| Segmentasi U-Net (test set) | IoU 0,9718 |
-| Estimasi massa, model terbaik (*piecewise linear* dengan profil) | MAE sekitar 22,7 g, MAPE sekitar 4,1%, R² sekitar 0,9978 |
+| Segmentasi U-Net (30 citra uji) | IoU 0,9718, Dice 0,9856 |
+| Estimasi massa, seluruh data (66 sampel) | MAE 22,7 g, MAPE 4,1%, R² 0,9978 |
+| Estimasi massa, data uji (13 sampel, 80:20) | MAE 29,1 g, MAPE 4,1% |
 
-Perbandingan model konversi volume ke massa (baseline 10 cm):
-
-| Model | MAE (g) | MAPE |
-|---|---|---|
-| Densitas manual | 145,5 | 15,1% |
-| Densitas empiris | 76,1 | 10,1% |
-| *Linear regression* | 67,6 | 19,4% |
-| *Piecewise linear* | 46,2 | 7,1% |
-| *Multiple regression* + profil | 26,5 | 6,6% |
-| ***Piecewise linear* + profil** | **22,7** | **4,1%** |
-
-Detail metrik dan perbandingan seluruh model ada di folder `hasil_18_perbandingan_5_model_estimasi_massa/00_ringkasan_hasil/`.
-
-### Contoh visual
-
-**Segmentasi U-Net** (kolom: gambar, *ground truth*, prediksi, *overlay*):
-
-![Contoh segmentasi U-Net](hasil_training_unet_colab/preview_test/test_preview_002.png)
-
-**Kurva training:**
-
-![Kurva training U-Net](hasil_training_unet_colab/curves_training.png)
-
-**Perbandingan model estimasi massa (aktual vs prediksi):**
-
-![Aktual vs prediksi](hasil_18_perbandingan_5_model_estimasi_massa/00_ringkasan_hasil/00_gabungan_model_grafik_aktual_vs_prediksi.png)
-
-**Dashboard estimasi per sampel:**
+Model terbaik adalah ***piecewise linear* + profil tumpukan**. Perbandingan dengan lima model lain ada di [PIPELINE.md](PIPELINE.md#tahap-6-estimasi-massa-skrip-18-sampai-20).
 
 ![Dashboard estimasi](hasil_19_estimasi_massa_semua_model/dashboard_visual_20260704_172156/B10_T1000_R02_gundukan_20260702_133355_dashboard_estimasi.png)
 
-Pada contoh ini (sampel dengan massa aktual 1000 g, tumpukan berbentuk gundukan), sistem mengestimasi volume 1131,14 cm³ dan massa 1013,97 g dengan model *piecewise linear* + profil.
+*Contoh sampel 1000 g (gundukan): estimasi volume 1131,14 cm³ dan massa 1013,97 g.*
+
+![Contoh segmentasi U-Net](hasil_training_unet_colab/preview_test/test_preview_002.png)
+
+*Segmentasi U-Net, dari kiri ke kanan: gambar, ground truth, prediksi, overlay.*
 
 ---
 
 ## Gambaran Sistem
 
-- **Objek uji:** miniatur gerbong batu bara berukuran 40 × 10 × 7,5 cm
-- **Kamera:** tiga webcam dalam susunan tetap (satu kamera kiri bersama dan dua kamera kanan untuk dua variasi *baseline*, 10 cm dan 15 cm)
-- **Kalibrasi:** papan ChArUco 5 × 7, kalibrasi intrinsik dan stereo, lalu rektifikasi
-- **Segmentasi:** U-Net biner (batu bara vs latar), dilatih pada 200 citra (140 *train*, 30 *validation*, 30 *test*) yang dianotasi di Roboflow
-- **Estimasi tinggi:** peta kedalaman stereo (StereoSGBM), lalu peta tinggi tumpukan di dalam area hasil segmentasi
+- **Objek uji:** miniatur gerbong batu bara 40 × 10 × 7,5 cm
+- **Kamera:** dua webcam JETE W7, susunan *top-down*, *baseline* 10 cm atau 15 cm
+- **Kalibrasi:** papan ChArUco 7 × 5, kalibrasi intrinsik dan stereo, lalu rektifikasi
+- **Segmentasi:** U-Net biner (batu bara vs latar), 200 citra (140 *train*, 30 *validation*, 30 *test*) dianotasi di Roboflow, dilatih di Google Colab
+- **Tinggi:** peta kedalaman stereo (StereoSGBM) menjadi peta tinggi di dalam area segmentasi
 - **Volume:** integrasi peta tinggi dengan homografi
-- **Massa:** konversi volume ke massa dengan beberapa strategi model yang dibandingkan
-
-Alur lengkap:
+- **Massa:** konversi volume ke massa, enam strategi model dibandingkan
 
 ```mermaid
 flowchart LR
@@ -75,15 +51,25 @@ flowchart LR
     H --> I[Estimasi massa]
 ```
 
----
-
-## Penjelasan Bergambar
-
-Penjelasan bergambar untuk setiap tahap, dari foto stereo sampai estimasi massa pada satu sampel yang sama, tersedia di **[PIPELINE.md](PIPELINE.md)**.
+Penjelasan bergambar tiap tahap, gerbang kelayakan, dan uji akurasi kedalaman ada di **[PIPELINE.md](PIPELINE.md)**.
 
 ---
 
-## Urutan Skrip
+## Cara Menjalankan
+
+**Kebutuhan:** Python 3, OpenCV versi *contrib* (modul `aruco`), NumPy, PyTorch, Matplotlib, python-docx. Instal dengan `pip install -r requirements.txt`. Training U-Net dijalankan di Google Colab (notebook pada skrip 12).
+
+**Model dan dataset** tidak disertakan karena ukurannya besar (bobot `model_best.pth` dan dataset Roboflow sekitar 474 MB). Unduh di: **[tautan Google Drive, akan ditambahkan]**
+
+1. Jalankan skrip 01 sampai 05 untuk kalibrasi kamera dan rektifikasi.
+2. Siapkan dataset dan model: unduh dari tautan di atas, atau buat sendiri melalui skrip 08 sampai 12 (training pada skrip 12 dijalankan di Google Colab, bukan lokal).
+3. Jalankan skrip 13 untuk segmentasi, lalu skrip 15 dan 16 untuk volume.
+4. Jalankan skrip 18 dan 19 untuk estimasi massa, atau skrip 20 untuk demo *near real-time*.
+
+Sesuaikan jalur (*path*) folder di dalam tiap skrip dengan lokasi berkas di komputer Anda.
+
+<details>
+<summary><b>Daftar skrip (20)</b></summary>
 
 Skrip diberi nomor sesuai urutan pengerjaan. Ringkasan urutan juga ada di `00_README_URUTAN_ALUR_MASSA.txt`.
 
@@ -93,7 +79,7 @@ Skrip diberi nomor sesuai urutan pengerjaan. Ringkasan urutan juga ada di `00_RE
 | 02 | `02_02_kalibrasi_intrinsik_charuco_...` | Kalibrasi intrinsik kamera kiri dan kanan |
 | 03 | `03_03_kalibrasi_stereo_CHARUCO_XML_...` | Kalibrasi stereo (parameter ekstrinsik) |
 | 04 | `04_04_rektifikasi_stereomap_realtime_...` | Rektifikasi dan pembuatan *stereo map* |
-| 05 | `05_15C_evaluasi_kalibrasi_stereo_rektifikasi` | Evaluasi hasil kalibrasi dan rektifikasi |
+| 05 | `05_15C_evaluasi_kalibrasi_stereo_rektifikasi` | Evaluasi kalibrasi dan rektifikasi |
 | 06 | `06_05_depth_map_...` | Pembuatan peta kedalaman |
 | 07 | `07_05B_evaluasi_stereo_depth_lantai_objek_...` | Evaluasi akurasi kedalaman stereo |
 | 08 | `08_06_akuisisi_dataset_UNET_VARIATIF_200_...` | Akuisisi dataset U-Net |
@@ -110,9 +96,10 @@ Skrip diberi nomor sesuai urutan pengerjaan. Ringkasan urutan juga ada di `00_RE
 | 19 | `19_estimasi_massa_semua_model_NEAR_REALTIME` | Estimasi massa dengan semua model |
 | 20 | `20_16_demo_realtime_volume_massa_PER_BASELINE` | Demo *near real-time* per *baseline* |
 
----
+</details>
 
-## Struktur Folder
+<details>
+<summary><b>Struktur folder hasil</b></summary>
 
 | Folder | Isi |
 |---|---|
@@ -130,46 +117,15 @@ Skrip diberi nomor sesuai urutan pengerjaan. Ringkasan urutan juga ada di `00_RE
 
 Folder `hasil_inference_unet/`, `hasil_integrasi_unet_depth/`, dan `hasil_volume_homografi/` hanya berisi beberapa contoh. Seluruh hasilnya dapat dibuat ulang dengan menjalankan skrip terkait.
 
----
-
-## Model dan Dataset
-
-Berkas berikut tidak disertakan di repositori karena ukurannya besar:
-
-- Bobot model U-Net (`model_best.pth`)
-- Dataset U-Net hasil ekspor Roboflow (sekitar 474 MB)
-
-Unduh di sini: **[tautan Google Drive, akan ditambahkan]**
-
----
-
-## Kebutuhan
-
-- Python 3
-- Library utama: OpenCV versi *contrib* (modul `aruco`), NumPy, PyTorch, Matplotlib, dan python-docx (untuk laporan Word)
-- Daftar lengkap ada di `requirements.txt`: `pip install -r requirements.txt`
-- Training U-Net dijalankan di Google Colab (notebook pada skrip 12)
-
-Versi library dapat disesuaikan dengan lingkungan masing-masing.
-
----
-
-## Cara Menjalankan
-
-1. Jalankan skrip 01 sampai 05 untuk kalibrasi kamera dan rektifikasi.
-2. Siapkan dataset dan model: unduh dari tautan di atas, atau buat sendiri melalui skrip 08 sampai 12.
-3. Jalankan skrip 13 untuk segmentasi, lalu skrip 15 dan 16 untuk volume.
-4. Jalankan skrip 18 dan 19 untuk estimasi massa, atau skrip 20 untuk demo *near real-time*.
-
-Sesuaikan jalur (*path*) folder di dalam tiap skrip dengan lokasi berkas di komputer Anda.
+</details>
 
 ---
 
 ## Keterbatasan
 
-- Sistem diuji pada miniatur skala laboratorium, bukan pada gerbong sungguhan.
-- Hasil pada kondisi lapangan (pencahayaan, debu, getaran, dan ukuran gerbong sebenarnya) belum diuji.
-- Hasil di repositori ini menggunakan *baseline* 10 cm.
+- Diuji pada miniatur skala laboratorium, bukan gerbong sungguhan. Kondisi lapangan (pencahayaan, debu, getaran) belum diuji.
+- Hasil di repositori ini memakai *baseline* 10 cm. Konfigurasi 15 cm baru diuji pada tahap kalibrasi, sehingga pengaruh *baseline* terhadap akurasi belum dapat dibandingkan.
+- Evaluasi data uji memakai satu pembagian 80:20 (13 sampel); validasi silang berulang masih diperlukan.
 
 ---
 
