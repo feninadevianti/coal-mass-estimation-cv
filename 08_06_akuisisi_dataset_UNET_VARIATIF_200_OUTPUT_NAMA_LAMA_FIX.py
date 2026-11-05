@@ -1,27 +1,3 @@
-"""
-SCRIPT 6 — AKUISISI DATASET U-NET VARIATIF 200 CITRA + OUTPUT NAMA LAMA
-================================================================
-
-Fungsi:
-1. Mengambil citra kamera kiri untuk dataset U-Net.
-2. Menyamakan alur input dengan pipeline kalibrasi yang memakai crop Script 06:
-   kamera live -> crop ROI yang sama -> resize ke ukuran stereomap -> cv2.remap.
-3. Membaca hasil_kalibrasi/stereomap.xml.
-4. Mengikuti rencana dataset variatif 200 citra agar data tidak monoton.
-5. Tetap menyimpan output ke folder lama dataset_unet/ agar script berikutnya tidak perlu diubah.
-6. Menyimpan:
-   - kiri_raw       : frame input yang sudah SELARAS dengan stereomap
-                     (jika crop aktif, ini adalah crop-resize sebelum rectification)
-   - kiri_rectified : frame setelah cv2.remap, ini yang disarankan untuk training U-Net
-   - preview        : perbandingan input vs rectified
-   - log_akuisisi.csv
-
-Catatan penting:
-- Jika kalibrasi/capture ChArUco sebelumnya memakai SIMPAN_FRAME_CROP=True,
-  maka frame live pada script ini juga wajib di-crop dengan ROI yang sama sebelum cv2.remap.
-- Dataset U-Net sebaiknya memakai folder kiri_rectified, karena tahap inference nanti juga
-  memakai frame kiri yang sudah direktifikasi/remap.
-
 Kontrol:
 [S]   Simpan input + rectified + preview
 [C]   Ganti tahap muatan dan variasi
@@ -53,24 +29,17 @@ OUTPUT_CAMERA_RAW_ROOT = os.path.join(DATASET_ROOT, "kiri_camera_raw_original")
 LOG_CSV = os.path.join(DATASET_ROOT, "log_akuisisi.csv")
 RENCANA_CSV = os.path.join(DATASET_ROOT, "rencana_akuisisi_dataset_200.csv")
 
-# CATATAN PENTING:
-# Folder output sengaja tetap memakai nama lama: dataset_unet/
-# Tujuannya agar alur setelah akuisisi tidak perlu mengubah nama/path.
-# Gambar yang disarankan untuk anotasi Roboflow tetap: dataset_unet/kiri_rectified/
-
 # =========================================================
-# KONFIGURASI KAMERA DAN CROP SELARAS SCRIPT 06
+# KONFIGURASI KAMERA DAN CROP 
 # =========================================================
 CAMERA_ID_KIRI = 0
 AUTO_DETECT_CAMERA = True
 SCAN_CAMERA_MAX_ID = 10
 
-# Ukuran raw kamera sebelum crop. Pada setup Anda umumnya 640x480.
 CAMERA_RAW_WIDTH = 640
 CAMERA_RAW_HEIGHT = 480
 FPS = 30
 
-# Setting kamera diselaraskan dengan Script 06 Capture ChArUco.
 SAMAKAN_SETTING_KAMERA = True
 WB_TEMPERATURE = 4500
 BRIGHTNESS_VALUE = 128
@@ -82,11 +51,8 @@ KUNCI_AUTOFOCUS = False
 FOCUS_LEFT = 0
 FOCUS_RIGHT = 0
 
-# Harus True jika dataset kalibrasi sebelumnya berasal dari Script 06 dengan SIMPAN_FRAME_CROP=True.
 TERAPKAN_CROP_REALTIME = True
 
-# ROI sama dengan Script 06/Script 4/Script 5 yang sudah diselaraskan.
-# Format: (x_awal, y_awal, x_akhir, y_akhir), skala 0.0 sampai 1.0
 ROI_LEFT = (0.00, 0.05, 1.00, 0.95)
 
 # Jika ukuran hasil crop berbeda dari stereomap, hasil crop akan di-resize ke image_size stereomap.
@@ -107,12 +73,6 @@ RMS_STEREO_BATAS_AMAN = 1.0
 
 IMAGE_EXT = ".png"
 
-# Target jumlah citra dibuat lebih variatif sesuai rancangan 200 citra.
-# Prinsip rancangan:
-# - Dataset tidak didominasi kondisi kosong, merata, atau gunungan/overload.
-# - Variasi diperbanyak pada muatan kecil sampai tinggi karena bentuk mask berubah banyak.
-# - Kondisi penuh datar diasumsikan sekitar 45 genggam berdasarkan uji awal.
-# - Istilah genggam hanya untuk panduan akuisisi. Jika memungkinkan, setiap tahap tetap ditimbang dalam gram.
 TARGET = {
     "kosong": {
         "referensi_gerbong_kosong": 8,
