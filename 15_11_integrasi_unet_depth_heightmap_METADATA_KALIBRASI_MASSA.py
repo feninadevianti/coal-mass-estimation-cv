@@ -3,27 +3,6 @@ SCRIPT 11 — INTEGRASI U-NET MASK + DEPTH MAP + REFERENSI LANTAI LOKAL + METADA
 VERSI REALTIME VALIDASI LANTAI 05B — AUTO FLOOR VISIBILITY UNTUK SEMUA KONDISI
 ====================================================
 
-Fungsi utama:
-1. Load model U-Net terbaik: hasil_training_unet_colab/model_best.pth atau hasil_training_unet/model_best.pth
-2. Load stereomap: hasil_kalibrasi/stereomap.xml
-3. Load Z_ref: hasil_kalibrasi/zref.xml atau hasil_kalibrasi/zref.npz
-4. Buka kamera stereo kiri-kanan
-5. Rectification dengan cv2.remap
-6. Hitung disparity map dengan StereoSGBM
-7. Konversi disparity ke depth map dengan Q matrix
-8. Prediksi mask batubara dengan U-Net
-9. Ambil depth hanya pada area mask batubara
-10. Hitung height map utama: h(x,y) = depth_lantai_kosong(x,y) - depth_batubara(x,y)
-11. Tampilkan realtime dan simpan snapshot jika tombol S ditekan
-
-Catatan:
-- Script ini menghitung HEIGHT MAP / peta tinggi batubara.
-- Versi ini diselaraskan dengan Script 05B terbaru: jika tersedia snapshot LANTAI_KOSONG dari Script 05, tinggi dihitung memakai floor reference map lokal per piksel, bukan hanya satu angka Z_ref global.
-- Volume final belum dihitung otomatis karena membutuhkan konversi luas piksel ke luas dunia nyata.
-- Output height_m dapat dipakai untuk tahap volume berikutnya.
-- Wajib ada snapshot LANTAI_KOSONG dari Script 05 terbaru agar referensi lantai lokal aktif.
-- Jika snapshot LANTAI_KOSONG tidak ditemukan, script akan fallback ke Z_ref scalar dan memberi warning.
-- Validasi ROI lantai 05B otomatis menyesuaikan kondisi: lantai terlihat penuh, terlihat sebagian, atau tertutup seluruhnya oleh muatan.
 
 Kontrol:
 [S]   Simpan snapshot lengkap jika status VALID
