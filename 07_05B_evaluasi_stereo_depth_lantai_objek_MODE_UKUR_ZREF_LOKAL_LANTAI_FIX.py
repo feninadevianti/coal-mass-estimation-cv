@@ -1,41 +1,3 @@
-"""
-SCRIPT 05B — EVALUASI STEREO VISION MODE UKUR + ZREF LOKAL LANTAI FIX
-================================================================
-
-Versi ini disesuaikan dengan Script 05 terbaru:
-05_depth_map_SELARAS_06_ROBUST_MULTI_FRAME_TAMPILAN_FULL_MODE_UKUR.py
-
-Fokus evaluasi:
-1. LANTAI_KOSONG  -> uji jarak kamera ke lantai gerbong.
-2. OBJEK_BALOK    -> uji tinggi balok acuan menggunakan ROI kecil di permukaan atas balok.
-3. MUATAN_BATUBARA tidak dievaluasi di 05B karena tahap ini khusus validasi stereo sebelum U-Net/volume/massa.
-
-PERBAIKAN VERSI INI:
-- Untuk tinggi_objek, Z_ref dapat diambil dari ROI LANTAI_KOSONG yang dipilih manual/valid
-  pada evaluasi 05B, bukan selalu dari zref.npz global.
-- Ini lebih cocok jika zref.npz global diambil dari ROI tengah yang berbeda dengan ROI lantai gerbong.
-- Contoh: jika depth lantai ROI = 54.58 cm dan depth atas balok = 49.41 cm,
-  maka tinggi balok = 54.58 - 49.41 = 5.17 cm.
-
-PENTING:
-- Z_ref harus diambil saat gerbong kosong.
-- Snapshot balok harus disimpan saat mode Script 05 = OBJEK BALOK.
-- Untuk balok, ROI harus dipilih manual di permukaan atas balok, bukan seluruh gerbong.
-
-Cara pakai paling aman:
-1. Jalankan Script 05 mode ukur.
-2. Gerbong kosong -> tekan Z untuk simpan Z_ref -> mode LANTAI KOSONG -> tekan S.
-3. Letakkan balok 5 cm -> tekan M sampai OBJEK BALOK -> tekan F -> tunggu Stabil: YA -> tekan S.
-4. Jalankan script ini pertama kali:
-   python 05B_evaluasi_stereo_depth_lantai_objek_SESUAI_SCRIPT05_MODE_UKUR.py
-5. Isi CSV nilai aktual:
-   - jarak_lantai: isi 56 atau sesuai pengukuran aktual.
-   - tinggi_objek: isi 5 atau sesuai tinggi balok.
-6. Pilih ROI manual untuk balok:
-   python 05B_evaluasi_stereo_depth_lantai_objek_SESUAI_SCRIPT05_MODE_UKUR.py --pilih-roi
-7. Jalankan lagi tanpa argumen untuk membuat hasil evaluasi.
-"""
-
 import os
 import sys
 import csv
@@ -56,9 +18,6 @@ try:
 except Exception:
     MATPLOTLIB_OK = False
 
-# =========================================================
-# KONFIGURASI UTAMA
-# =========================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 KALIBRASI_DIR = os.path.join(BASE_DIR, "hasil_kalibrasi")
 SNAPSHOT_DIR = os.path.join(KALIBRASI_DIR, "snapshot_depth")
@@ -70,39 +29,25 @@ HASIL_CSV = os.path.join(OUTPUT_DIR, "hasil_evaluasi_stereo_05b_mode_ukur.csv")
 RINGKASAN_TXT = os.path.join(OUTPUT_DIR, "ringkasan_evaluasi_stereo_05b_mode_ukur.txt")
 PREVIEW_DIR = os.path.join(OUTPUT_DIR, "preview_roi")
 
-# Area default untuk lantai. Untuk balok, ROI manual sangat disarankan.
 CENTER_CROP_LANTAI = 0.50
 CENTER_CROP_OBJEK_DARURAT = 0.12  # hanya fallback kalau user belum pilih ROI manual
 
-# Statistik utama. Median lebih aman dari noise/outlier.
 STAT_UTAMA = "median"
 
-# Range depth wajar untuk setup miniature sekitar 55–60 cm.
 DEPTH_MIN_CM = 20.0
 DEPTH_MAX_CM = 90.0
 
-# Batas validitas ROI.
 MIN_VALID_PIXELS = 30
 MIN_VALID_ROI_LANTAI_PCT = 70.0
 MIN_VALID_ROI_OBJEK_PCT = 50.0
 
-# Ambang error untuk status sederhana.
 BATAS_ERROR_CM_OK = 1.0
 BATAS_ERROR_CM_CUKUP = 1.5
 
-# Gunakan Z_ref raw dari Script 05. Ini konsisten dengan depth_map raw.
-# Jangan ubah kecuali Anda benar-benar memahami koreksi tilt pada seluruh depth map.
 PAKAI_ZREF_VERTICAL = False
 
-# FIX PENTING:
-# Untuk pengujian tinggi balok, pakai depth lantai dari snapshot LANTAI_KOSONG
-# sebagai Z_ref lokal bila tersedia. Ini menghindari error jika zref.npz global
-# berasal dari ROI tengah yang tidak sama dengan ROI lantai gerbong.
 PAKAI_ZREF_LOKAL_DARI_ROI_LANTAI = True
 
-# =========================================================
-# UTILITAS DASAR
-# =========================================================
 def pastikan_folder():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     os.makedirs(PREVIEW_DIR, exist_ok=True)
