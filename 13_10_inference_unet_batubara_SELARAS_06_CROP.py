@@ -1,17 +1,4 @@
-"""
-SCRIPT 10 — INFERENCE U-NET SEGMENTASI BATUBARA
-SELARAS TRAINING COLAB + SCRIPT 06 CROP + STEREOMAP
-====================================================
 
-Fungsi:
-1. Memuat model terbaik hasil training U-Net:
-   - hasil_training_unet_colab/model_best.pth, atau
-   - hasil_training_unet/model_best.pth
-2. Menghasilkan mask batubara otomatis dari folder gambar atau kamera realtime.
-3. Mode folder digunakan untuk uji model pada gambar test/rectified.
-4. Mode camera digunakan untuk realtime kamera kiri:
-   kamera live -> crop ROI Script 06 -> cv2.remap stereomap -> U-Net -> mask.
-5. Menyimpan image, mask 0/1, mask visual 0/255, overlay, dan log.
 
 Output:
 hasil_inference_unet/
@@ -26,12 +13,6 @@ Mask:
 0 = background
 1 = batubara
 
-Catatan:
-- Untuk perhitungan volume, mask_01 harus sejajar dengan depth map.
-- Karena depth map Anda berbasis kamera kiri/rectified, inference juga dibuat berbasis kamera kiri/rectified.
-- Homografi belum diterapkan di script ini. Homografi dipakai pada tahap berikutnya untuk ROI lantai gerbong/volume.
-"""
-
 import os
 import csv
 from glob import glob
@@ -44,10 +25,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
-# =========================================================
-# KONFIGURASI
-# =========================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 MODEL_PATH_CANDIDATES = [
@@ -58,26 +35,21 @@ MODEL_PATH = MODEL_PATH_CANDIDATES[0]
 
 STEREOMAP_XML = os.path.join(BASE_DIR, "hasil_kalibrasi", "stereomap.xml")
 
-# Ubah ke "camera" jika ingin realtime kamera kiri.
 MODE = "folder"  # "folder" atau "camera"
 
-# Folder input untuk mode folder. Idealnya gambar rectified.
 INPUT_IMAGE_DIR = os.path.join(BASE_DIR, "dataset_unet_binary_roboflow_FIXED_01", "test", "images")
 OUTPUT_DIR = os.path.join(BASE_DIR, "hasil_inference_unet")
 
-# Default, nanti bisa ditimpa dari checkpoint model_best.pth
 IMAGE_WIDTH = 640
 IMAGE_HEIGHT = 480
 THRESHOLD = 0.5
 BASE_CHANNELS = 32
 
-# Kamera kiri sebagai reference camera sesuai pipeline depth.
 CAMERA_ID_KIRI = 0
 CAMERA_RAW_WIDTH = 640
 CAMERA_RAW_HEIGHT = 480
 FPS = 30
 
-# Setting kamera diselaraskan dengan Script 06 Capture ChArUco.
 SAMAKAN_SETTING_KAMERA = True
 WB_TEMPERATURE = 4500
 BRIGHTNESS_VALUE = 128
