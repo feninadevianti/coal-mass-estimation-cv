@@ -1,22 +1,3 @@
-"""
-SCRIPT 15C — EVALUASI KALIBRASI STEREO DAN REKTIFIKASI
-======================================================
-
-Fungsi:
-1. Membaca output kalibrasi stereo dari hasil_kalibrasi/stereomap.xml.
-2. Mengevaluasi apakah kalibrasi stereo memenuhi kriteria penelitian.
-3. Mengecek keberadaan stereo map kiri-kanan, Q matrix, RMS stereo, dan baseline.
-4. Menyimpan ringkasan evaluasi dalam CSV dan TXT.
-
-Kriteria default:
-- RMS/reprojection error stereo <= 1.0 piksel.
-- Selisih baseline hasil kalibrasi terhadap baseline fisik <= 5%.
-- stereoMapL_x, stereoMapL_y, stereoMapR_x, stereoMapR_y, dan Q wajib ada.
-
-Catatan:
-- Evaluasi rectification visual tetap perlu dilihat dari Script 04,
-  yaitu garis epipolar kiri-kanan harus sejajar secara horizontal.
-"""
 
 import os
 import csv
@@ -25,26 +6,16 @@ from datetime import datetime
 import cv2
 import numpy as np
 
-
-# =========================================================
-# KONFIGURASI
-# =========================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 KALIBRASI_DIR = os.path.join(BASE_DIR, "hasil_kalibrasi")
 STEREOMAP_XML = os.path.join(KALIBRASI_DIR, "stereomap.xml")
 OUTPUT_DIR = os.path.join(BASE_DIR, "hasil_evaluasi_kalibrasi_stereo")
 
-# Sesuaikan dengan baseline fisik kamera pada alat Anda.
 BASELINE_FISIK_CM = 10.0
 
-# Ambang kriteria penelitian.
 RMS_MAX_PX = 1.0
 BASELINE_ERROR_MAX_PCT = 5.0
 
-
-# =========================================================
-# UTILITAS XML
-# =========================================================
 def _node_empty(node):
     try:
         return node.empty()
@@ -76,10 +47,6 @@ def baca_int(fs, nama_node, default=None):
         return default
     return int(round(val))
 
-
-# =========================================================
-# LOAD DATA KALIBRASI
-# =========================================================
 def load_stereomap_info():
     if not os.path.exists(STEREOMAP_XML):
         raise FileNotFoundError(f"stereomap.xml tidak ditemukan: {STEREOMAP_XML}")
@@ -112,10 +79,6 @@ def load_stereomap_info():
         "baseline_mm": baseline_mm,
     }
 
-
-# =========================================================
-# EVALUASI
-# =========================================================
 def status_bool(cond):
     return "LULUS" if cond else "TIDAK LULUS"
 
@@ -157,10 +120,6 @@ def evaluasi(info):
         "hasil_akhir": hasil_akhir,
     }
 
-
-# =========================================================
-# SIMPAN OUTPUT
-# =========================================================
 def simpan_hasil(hasil):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     waktu = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -200,10 +159,6 @@ def simpan_hasil(hasil):
     print(f"CSV : {csv_path}")
     print(f"TXT : {txt_path}")
 
-
-# =========================================================
-# MAIN
-# =========================================================
 def main():
     print("\n" + "=" * 72)
     print("SCRIPT 15C — EVALUASI KALIBRASI STEREO DAN REKTIFIKASI")
