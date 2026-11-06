@@ -1,34 +1,3 @@
-"""
-SCRIPT 15D — EVALUASI VOLUME HOMOGRAFI GERBONG BATUBARA (SELARAS SISTEM)
-===========================================================================
-
-Posisi dalam alur sistem:
-    Script 11 -> Integrasi U-Net + depth + height map
-    Script 12 -> Hitung volume dengan homografi ROI gerbong
-    Script 15D -> Evaluasi hasil volume homografi
-    Script 13B/14 -> Kalibrasi empiris massa dan evaluasi massa akhir
-
-Fungsi utama:
-1. Membaca hasil Script 12 dari:
-       hasil_volume_homografi/volume_history.csv
-2. Mengevaluasi kewajaran volume berdasarkan batas fisik gerbong:
-       panjang = 40 cm, lebar = 10 cm, tinggi = 7.5 cm
-       kapasitas maksimum = 3000 cm^3
-3. Mengevaluasi tinggi maksimum agar tidak melebihi batas fisik gerbong
-   dengan toleransi, misalnya 9 cm.
-4. Mengevaluasi jumlah valid volume pixels agar hasil tidak berasal dari noise kecil.
-5. Mengevaluasi area per pixel homografi jika data tersedia.
-6. Opsional: membandingkan volume sistem dengan volume aktual/manual jika pengguna
-   mengisi file:
-       hasil_evaluasi_volume_homografi/data_volume_aktual_homografi.csv
-
-Catatan:
-- Script ini TIDAK menghitung ulang volume dan TIDAK menghitung ulang tinggi dari Z_ref global.
-- Script ini hanya mengevaluasi hasil volume dari Script 12 terbaru yang memakai height_m dari Script 11.
-- Jika volume aktual belum tersedia, script tetap membuat evaluasi kewajaran internal.
-- Jika volume aktual tersedia, script menghitung MAE, RMSE, MAPE, R2, dan error per data.
-"""
-
 import os
 import csv
 import math
