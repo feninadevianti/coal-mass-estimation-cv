@@ -1,39 +1,3 @@
-"""
-SCRIPT 18 - PERBANDINGAN MODEL ESTIMASI MASSA BATUBARA
-========================================================
-
-Script gabungan untuk mencoba beberapa model estimasi massa muatan batubara
-pada gerbong/wagon berdasarkan data kalibrasi Script 18.
-
-Input utama:
-    hasil_18_kalibrasi_empiris_massa/18_data_kalibrasi_empiris_massa_per_baseline.csv
-
-Jika input belum ada, script membuat template dari:
-    hasil_volume_homografi/volume_history.csv
-
-Output utama:
-    hasil_18_perbandingan_5_model_estimasi_massa/
-        01_density_manual/
-        02_density_empirical/
-        03_linear_regression/
-        04_piecewise_linear/
-        05_multiple_regression_profile/
-        00_ringkasan_hasil/
-
-Folder ringkasan berisi:
-    - perbandingan metrik model
-    - ranking metode terbaik berbasis data
-    - grafik gabungan model
-    - laporan PDF
-    - laporan DOCX jika python-docx tersedia
-    - daftar data yang perlu dicek ulang karena error tinggi
-
-Catatan:
-- Analisis metode terbaik dihitung dari MAE, RMSE, MAPE, R2, dan jumlah error tinggi.
-- Data yang disarankan dicek ulang bukan otomatis dibuang. Cek ulang berarti periksa
-  kembali timbangannya, mask batubara, volume/depth, baseline, dan bentuk muatannya.
-"""
-
 import os
 import csv
 import json
