@@ -1,36 +1,3 @@
-"""
-SCRIPT 16 — DEMO REALTIME VOLUME DAN MASSA BATUBARA PER BASELINE
-SELARAS SCRIPT 11 Z_REF LOKAL + SCRIPT 12 TERBARU + SCRIPT 13B
-====================================================
-
-Fungsi utama:
-1. Membuka kamera stereo secara langsung.
-2. Melakukan crop realtime, rectification, disparity, depth map, segmentasi U-Net,
-   height map, homografi ROI gerbong, perhitungan volume, dan estimasi massa.
-3. Menampilkan dashboard realtime di monitor.
-4. Menyediakan visualisasi dasar perhitungan volume per piksel:
-       V_total = Σ(h_i × A_piksel)
-5. Menyimpan bukti pengujian langsung berupa gambar, data NPZ, TXT, dan CSV.
-
-Syarat file yang harus sudah ada:
-- Script 11  : 11_integrasi_unet_depth_heightmap_SELARAS_05B_ZREF_LOKAL_VERSI_TERBARU.py
-- Script 12  : 12_hitung_volume_homografi_gerbong_UNIFIED_SINGLE_BATCH.py
-- Model U-Net: hasil_training_unet_colab/model_best.pth atau hasil_training_unet/model_best.pth
-- Stereomap  : hasil_kalibrasi/stereomap.xml
-- Z_ref      : hasil_kalibrasi/zref.npz atau hasil_kalibrasi/zref.xml
-- ROI gerbong: hasil_volume_homografi/roi_gerbong_points.json
-               Jika belum ada, script akan meminta klik 4 titik ROI gerbong.
-- Model massa empiris per baseline dari Script 13B:
-               hasil_kalibrasi_massa/model_kalibrasi_massa_per_baseline.json
-               Jika belum ada, script dapat memakai estimasi densitas sementara.
-
-Kontrol keyboard:
-- S : simpan hasil frame saat ini
-- C : capture pengujian, ambil beberapa frame lalu simpan rata-rata volume/massa
-- R : pilih ulang ROI gerbong dari frame realtime saat ini
-- ESC : keluar
-"""
-
 import os
 import sys
 import csv
